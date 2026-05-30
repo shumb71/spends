@@ -482,23 +482,30 @@ function onPinInput() {
   document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<v.length));
   document.getElementById('pinErr').textContent='';
   document.getElementById('pinInput').classList.remove('shake');
-  if(v.length===6) setTimeout(checkPin,100);
+  if(v.length===6) setTimeout(()=>checkPin(),200);
 }
 function checkPin() {
-  const v=document.getElementById('pinInput').value;
+  const inp=document.getElementById('pinInput');
+  const v=inp.value;
+  if(!v){inp.focus();return;}
+  const err=document.getElementById('pinErr');
   if(v===PIN_CODE){
+    err.style.color='var(--accent)';
+    err.textContent='\u2713 Correcto\u2026';
     sessionStorage.setItem('pin_ok','1');
-    document.getElementById('pinScreen').style.display='none';
-    const st=sessionStorage.getItem('g_token');
-    if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
-    else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
+    setTimeout(()=>{
+      document.getElementById('pinScreen').style.display='none';
+      const st=sessionStorage.getItem('g_token');
+      if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
+      else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
+    },400);
   } else {
-    const inp=document.getElementById('pinInput');
     inp.classList.add('shake');
-    document.getElementById('pinErr').textContent='Código incorrecto';
+    err.style.color='var(--accent2)';
+    err.textContent='Código incorrecto';
     inp.value='';
     document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('filled'));
-    setTimeout(()=>inp.focus(),50);
+    setTimeout(()=>{inp.classList.remove('shake');inp.focus();},400);
   }
 }
 window.addEventListener('load',()=>{
