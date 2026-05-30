@@ -851,7 +851,9 @@ function autoDetectRole(header) {
 
 function buildColMapping() {
   colConfig = parsedHeaders.map(function(h) {
-    return {activa: autoDetectRole(h) !== 'ignorar', rol: autoDetectRole(h)};
+    var rol = autoDetectRole(h);
+    // ALL columns shown and checked — user decides what to ignore
+    return {activa: true, rol: rol};
   });
   renderColMapping();
   var banco = state.bancos.find(function(b) { return b.id === currentBancoId; });
