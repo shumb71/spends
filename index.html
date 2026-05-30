@@ -7,54 +7,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root {
-  --bg:#0d0f12;--surface:#161a20;--surface2:#1e2430;--border:#2a3040;
-  --accent:#00e5a0;--accent2:#ff4d6d;--accent3:#4d9fff;
-  --text:#e8ecf0;--text2:#8a95a3;--text3:#4a5568;
-  --income:#00e5a0;--expense:#ff4d6d;--radius:10px;
-  --font-mono:'Space Mono',monospace;--font-body:'DM Sans',sans-serif;
-}
+:root{--bg:#0d0f12;--surface:#161a20;--surface2:#1e2430;--border:#2a3040;--accent:#00e5a0;--accent2:#ff4d6d;--accent3:#4d9fff;--text:#e8ecf0;--text2:#8a95a3;--text3:#4a5568;--income:#00e5a0;--expense:#ff4d6d;--radius:10px;--font-mono:'Space Mono',monospace;--font-body:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;font-size:14px;}
 
-/* ── PIN LOGIN ── */
+/* PIN */
 #pinScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;}
 .pin-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:360px;text-align:center;position:relative;overflow:hidden;}
 .pin-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3));}
 .pin-logo{font-family:var(--font-mono);font-size:18px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
 .pin-logo span{color:var(--text2);}
-.pin-sub{font-size:11px;color:var(--text3);margin-bottom:32px;letter-spacing:1px;}
+.pin-ver{font-size:11px;color:var(--text3);margin-bottom:32px;letter-spacing:1px;}
 .pin-dots{display:flex;gap:8px;justify-content:center;margin-bottom:24px;}
 .pin-dot{width:12px;height:12px;border-radius:50%;background:var(--border);transition:background 0.2s;}
 .pin-dot.filled{background:var(--accent);}
 .pin-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:14px;font-family:var(--font-mono);font-size:22px;letter-spacing:8px;text-align:center;outline:none;transition:border-color 0.2s;margin-bottom:16px;}
 .pin-input:focus{border-color:var(--accent);}
-.pin-input.shake{animation:shake 0.3s;}
+.pin-input.shake{animation:shake .3s;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-.pin-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:14px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;}
+.pin-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:14px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;}
 .pin-btn:hover{background:#00ffb3;}
 .pin-err{font-size:12px;color:var(--accent2);margin-top:10px;min-height:16px;}
 
-/* ── GOOGLE AUTH ── */
-#authScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:20px;}
+/* GOOGLE AUTH */
+#authScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998;flex-direction:column;}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:360px;text-align:center;position:relative;overflow:hidden;}
 .auth-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),var(--accent));}
 .auth-logo{font-family:var(--font-mono);font-size:18px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
 .auth-logo span{color:var(--text2);}
 .auth-sub{font-size:12px;color:var(--text2);margin-bottom:32px;line-height:1.6;}
-.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#333;border:none;border-radius:var(--radius);padding:13px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#333;border:none;border-radius:var(--radius);padding:13px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;}
 .auth-google-btn:hover{background:#f5f5f5;}
 .auth-google-btn svg{width:20px;height:20px;}
-.auth-info{font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5;}
+.auth-info{font-size:11px;color:var(--text3);margin-top:14px;}
 .auth-user{display:flex;align-items:center;gap:10px;margin-top:16px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);}
 .auth-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;}
 .auth-name{font-size:13px;flex:1;text-align:left;}
 .auth-name small{display:block;font-size:11px;color:var(--text2);}
 
-/* ── APP ── */
+/* APP */
 #app{display:none;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
 .topbar-logo{font-family:var(--font-mono);font-size:15px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
@@ -66,21 +59,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-hei
 .drive-dot.ok{background:var(--accent);}
 .drive-dot.saving{background:var(--accent3);animation:pulse 1s infinite;}
 .drive-user{font-size:11px;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 .tabs{display:flex;gap:2px;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
-.tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
 .main{padding:24px 28px;max-width:1400px;margin:0 auto;}
 .panel{display:none;}.panel.active{display:block;}
 
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
 .btn-primary{background:var(--accent);color:#000;}.btn-primary:hover{background:#00ffb3;}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
 .btn-danger{background:transparent;color:var(--accent2);border:1px solid var(--accent2);}.btn-danger:hover{background:var(--accent2);color:#fff;}
-.btn-sm{padding:5px 10px;font-size:12px;}.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-sm{padding:5px 10px;font-size:12px;}.btn:disabled{opacity:.4;cursor:not-allowed;}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
 .card-title{font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:14px;}
@@ -102,14 +95,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-hei
 .bar-item{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
 .bar-label{width:150px;font-size:12px;color:var(--text2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bar-track{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;transition:width 0.5s ease;min-width:4px;}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease;min-width:4px;}
 .bar-amount{width:110px;font-family:var(--font-mono);font-size:11px;color:var(--text);text-align:right;}
 
 .table-wrapper{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
 thead th{padding:10px 12px;text-align:left;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
 thead th:hover{color:var(--text);}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
 tbody tr:hover{background:var(--surface2);}
 tbody td{padding:10px 12px;font-size:13px;}
 .td-amount{font-family:var(--font-mono);font-size:13px;text-align:right;}
@@ -122,13 +115,13 @@ tbody td{padding:10px 12px;font-size:13px;}
 .partida-select{background:var(--surface2);border:1px solid var(--accent);color:var(--text);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--font-body);outline:none;cursor:pointer;}
 
 .filtros-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
-.filter-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:7px 12px;font-family:var(--font-body);font-size:13px;outline:none;transition:border-color 0.2s;}
+.filter-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:7px 12px;font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s;}
 .filter-input:focus{border-color:var(--accent);}
 .filter-input::placeholder{color:var(--text3);}
 select.filter-input{cursor:pointer;}
 
-.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:20px;}
-.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(0,229,160,0.04);}
+.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:20px;}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(0,229,160,.04);}
 .drop-icon{font-size:36px;margin-bottom:10px;}
 .drop-title{font-size:15px;font-weight:500;margin-bottom:6px;}
 .drop-sub{font-size:12px;color:var(--text2);}
@@ -143,7 +136,6 @@ select.filter-input{cursor:pointer;}
 .reglas-list{display:flex;flex-direction:column;gap:6px;}
 .regla-row{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);}
 .regla-kw{flex:1;font-family:var(--font-mono);font-size:12px;color:var(--accent3);}
-.regla-arrow{color:var(--text3);font-size:12px;}
 
 .banco-config-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
 .banco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -154,13 +146,13 @@ select.filter-input{cursor:pointer;}
 .field-input{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-family:var(--font-body);font-size:13px;outline:none;}
 .field-input:focus{border-color:var(--accent);}
 
-#toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--text);transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:9999;max-width:320px;}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--text);transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;max-width:320px;}
 #toast.show{transform:translateY(0);opacity:1;}
 #toast.success{border-color:var(--accent);color:var(--accent);}
 #toast.error{border-color:var(--accent2);color:var(--accent2);}
 
 .periodo-bar{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
-.periodo-btn{padding:5px 14px;border-radius:20px;font-size:12px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;font-family:var(--font-body);}
+.periodo-btn{padding:5px 14px;border-radius:20px;font-size:12px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-family:var(--font-body);}
 .periodo-btn:hover{border-color:var(--text2);color:var(--text);}
 .periodo-btn.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600;}
 
@@ -171,14 +163,10 @@ select.filter-input{cursor:pointer;}
 .empty-state .empty-icon{font-size:40px;margin-bottom:12px;}
 .empty-state p{font-size:13px;margin-top:6px;}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;}
 .modal-title{font-family:var(--font-mono);font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
-
-.preview-table{font-size:11px;width:100%;overflow-x:auto;display:block;margin-top:10px;}
-.preview-table td{padding:4px 8px;border:1px solid var(--border);white-space:nowrap;}
-.preview-table tr:first-child td{background:var(--surface2);color:var(--accent);font-family:var(--font-mono);}
 
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .section-title{font-family:var(--font-mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);}
@@ -187,34 +175,47 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 .pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;font-size:12px;color:var(--text2);}
 .page-info{font-family:var(--font-mono);}
 
-.file-type-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-family:var(--font-mono);font-weight:700;margin-left:4px;}
-.file-type-badge.csv{background:rgba(77,159,255,0.15);color:var(--accent3);border:1px solid rgba(77,159,255,0.3);}
-.file-type-badge.xlsx,.file-type-badge.xls{background:rgba(0,229,160,0.15);color:var(--accent);border:1px solid rgba(0,229,160,0.3);}
-.file-type-badge.pdf{background:rgba(255,77,109,0.15);color:var(--accent2);border:1px solid rgba(255,77,109,0.3);}
+.file-type-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-family:var(--font-mono);font-weight:700;}
+.file-type-badge.csv{background:rgba(77,159,255,.15);color:var(--accent3);border:1px solid rgba(77,159,255,.3);}
+.file-type-badge.xlsx,.file-type-badge.xls{background:rgba(0,229,160,.15);color:var(--accent);border:1px solid rgba(0,229,160,.3);}
+.file-type-badge.pdf{background:rgba(255,77,109,.15);color:var(--accent2);border:1px solid rgba(255,77,109,.3);}
 
 .pdf-progress{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px;}
 .pdf-progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;}
-.pdf-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s;}
+.pdf-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
 
-/* ── BANCO PICKER ── */
+/* BANCO PICKER */
 .banco-picker-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-.banco-picker-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.15s;font-family:var(--font-body);font-size:13px;color:var(--text);text-align:left;}
+.banco-picker-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;font-family:var(--font-body);font-size:13px;color:var(--text);text-align:left;width:100%;}
 .banco-picker-btn:hover{border-color:var(--accent);color:var(--accent);}
-.banco-picker-btn .banco-fmt{font-size:10px;font-family:var(--font-mono);padding:2px 6px;border-radius:4px;margin-left:auto;}
-.banco-picker-btn .banco-fmt.pdf{background:rgba(255,77,109,0.15);color:var(--accent2);}
-.banco-picker-btn .banco-fmt.xlsx{background:rgba(0,229,160,0.15);color:var(--accent);}
-.banco-picker-btn .banco-fmt.csv{background:rgba(77,159,255,0.15);color:var(--accent3);}
-.banco-nuevo-form{display:none;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-top:4px;}
-.banco-nuevo-form.show{display:block;}
+.banco-picker-btn .bfmt{font-size:10px;font-family:var(--font-mono);padding:2px 6px;border-radius:4px;margin-left:auto;}
+.banco-picker-btn .bfmt.pdf{background:rgba(255,77,109,.15);color:var(--accent2);}
+.banco-picker-btn .bfmt.xlsx,.banco-picker-btn .bfmt.xls{background:rgba(0,229,160,.15);color:var(--accent);}
+.banco-picker-btn .bfmt.csv{background:rgba(77,159,255,.15);color:var(--accent3);}
+.nuevo-banco-form{display:none;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-top:4px;}
+.nuevo-banco-form.show{display:block;}
+
+/* COL MAPPING TABLE */
+.col-map-table{width:100%;border-collapse:collapse;font-size:12px;}
+.col-map-table th,.col-map-table td{border:1px solid var(--border);padding:0;}
+.col-map-th{background:var(--surface2);padding:8px 10px;vertical-align:top;min-width:140px;}
+.col-map-name{font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
+.col-map-check{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:var(--text2);}
+.col-map-check input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;}
+.col-map-sel{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 4px;font-size:11px;font-family:var(--font-body);outline:none;}
+.col-map-sel:disabled{opacity:.4;}
+.col-map-td{padding:6px 10px;color:var(--text2);font-size:11px;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
+.col-map-td.active{color:var(--text);}
+.new-rol-input{width:100%;background:var(--surface);border:1px solid var(--accent3);color:var(--text);border-radius:4px;padding:3px 6px;font-size:11px;font-family:var(--font-body);outline:none;margin-top:4px;display:none;}
 </style>
 </head>
 <body>
 
-<!-- ── PIN ── -->
+<!-- PIN -->
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-sub">ACCESO SEGURO · v4.0</div>
+    <div class="pin-ver">ACCESO SEGURO · v5.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -226,7 +227,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
   </div>
 </div>
 
-<!-- ── GOOGLE AUTH ── -->
+<!-- GOOGLE AUTH -->
 <div id="authScreen">
   <div class="auth-box">
     <div class="auth-logo">FINANZAS<span>/personal</span></div>
@@ -235,7 +236,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
       <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Conectar con Google
     </button>
-    <div class="auth-info">Solo se accederá a los archivos que esta app cree en tu Drive.</div>
+    <div class="auth-info">Solo se accede a archivos que esta app crea en tu Drive.</div>
     <div class="auth-user" id="authUserInfo" style="display:none">
       <div class="auth-avatar" id="authAvatar">?</div>
       <div class="auth-name" id="authName">Conectado<small id="authEmail"></small></div>
@@ -244,19 +245,16 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
   </div>
 </div>
 
-<!-- ── APP ── -->
+<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-logo">FINANZAS<span>/personal</span></div>
     <div class="topbar-actions">
       <span class="drive-user" id="topUser"></span>
-      <div class="drive-status">
-        <div class="drive-dot" id="driveDot"></div>
-        <span id="driveLabel">Drive</span>
-      </div>
-      <span class="version-badge">v4.0</span>
+      <div class="drive-status"><div class="drive-dot" id="driveDot"></div><span id="driveLabel">Drive</span></div>
+      <span class="version-badge">v5.0</span>
       <button class="btn btn-secondary btn-sm" onclick="syncDrive()">💾 Guardar</button>
-      <button class="btn btn-secondary btn-sm" onclick="signOut()" title="Cerrar sesión Google">⏏</button>
+      <button class="btn btn-secondary btn-sm" onclick="signOut()" title="Cerrar sesión">⏏</button>
     </div>
   </div>
 
@@ -270,6 +268,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
   </div>
 
   <div class="main">
+
     <!-- DASHBOARD -->
     <div class="panel active" id="panel-dashboard">
       <div class="periodo-bar" id="periodoBtns"></div>
@@ -327,7 +326,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
             <div class="drop-title">Cargar extracto bancario</div>
             <div class="drop-sub">Arrastra o haz clic<br>
               <span class="file-type-badge csv">CSV</span>
-              <span class="file-type-badge xlsx">XLSX</span>
+              <span class="file-type-badge xlsx">XLSX · XLS</span>
               <span class="file-type-badge pdf">PDF</span>
             </div>
           </div>
@@ -337,11 +336,18 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
             <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdfProgressFill" style="width:0%"></div></div>
           </div>
           <div class="card" id="previewCard" style="display:none">
-            <div class="card-title">Vista previa — <span id="previewFileName"></span></div>
+            <div class="card-title" id="previewTitle">Vista previa</div>
             <div id="previewContent"></div>
-            <div class="modal-actions" style="justify-content:flex-start;margin-top:16px">
-              <button class="btn btn-primary" onclick="importarDatos()">✔ Importar movimientos</button>
-              <button class="btn btn-secondary" onclick="cancelarPreview()">Cancelar</button>
+            <div style="display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap">
+              <div class="field-group" style="flex:0 0 auto">
+                <label class="field-label">Separador decimal</label>
+                <select class="field-input" id="colDecimal">
+                  <option value="coma">Coma (1.234,56)</option>
+                  <option value="punto">Punto (1,234.56)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="importarDatos()" style="margin-top:18px">✔ Importar movimientos</button>
+              <button class="btn btn-secondary" onclick="cancelarPreview()" style="margin-top:18px">Cancelar</button>
             </div>
           </div>
         </div>
@@ -392,6 +398,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
       <div id="bancosList"></div>
       <button class="btn btn-secondary" onclick="guardarBancos()" style="margin-top:12px">💾 Guardar bancos</button>
     </div>
+
   </div>
 </div>
 
@@ -400,25 +407,18 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
   <div class="modal">
     <div class="modal-title">¿De qué banco es este extracto?</div>
     <div class="banco-picker-grid" id="bancoPicker"></div>
-    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
-      <button class="btn btn-secondary" style="width:100%" onclick="toggleNuevoBanco()">+ Crear nuevo banco</button>
-      <div class="banco-nuevo-form" id="nuevoBancoForm">
-        <div class="field-row" style="margin-top:10px">
-          <div class="field-group">
-            <label class="field-label">Nombre del banco</label>
-            <input type="text" class="field-input" id="nuevoBancoNombre" placeholder="ej: Unicaja" style="width:100%">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Formato habitual</label>
-            <select class="field-input" id="nuevoBancoFormato">
-              <option value="csv">CSV</option>
-              <option value="xlsx">Excel</option>
-              <option value="pdf">PDF</option>
-            </select>
-          </div>
+    <hr class="separator" style="margin:12px 0">
+    <button class="btn btn-secondary" style="width:100%" onclick="toggleNuevoBanco()">+ Crear nuevo banco</button>
+    <div class="nuevo-banco-form" id="nuevoBancoForm">
+      <div class="field-row" style="margin-top:12px">
+        <div class="field-group"><label class="field-label">Nombre</label><input type="text" class="field-input" id="nuevoBancoNombre" placeholder="ej: Unicaja" style="width:100%"></div>
+        <div class="field-group"><label class="field-label">Formato habitual</label>
+          <select class="field-input" id="nuevoBancoFormato">
+            <option value="csv">CSV</option><option value="xlsx">Excel</option><option value="pdf">PDF</option>
+          </select>
         </div>
-        <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="crearYSeleccionarBanco()">Crear y continuar →</button>
       </div>
+      <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="crearYSeleccionarBanco()">Crear y continuar →</button>
     </div>
   </div>
 </div>
@@ -445,9 +445,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════
+// ═══ CONFIG ═══
 const PIN_CODE = '520423';
 const CLIENT_ID = '906920921997-mj5u3pf864il6789ul7vd4cp7utjrfrt.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
@@ -455,252 +453,130 @@ const FILE_REGLAS = 'finanzas_reglas_v3.json';
 const FILE_MOVS   = 'finanzas_movimientos_v3.json';
 const COLORES = ['#00e5a0','#ff4d6d','#4d9fff','#f5a623','#b97eff','#ff9f43','#54a0ff','#1dd1a1','#ffeaa7','#fd79a8','#a29bfe','#74b9ff','#00cec9','#e17055','#6c5ce7'];
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-let state = { movimientos:[], partidas:[], reglas:[], bancos:[], historial:[] };
+// Roles del sistema (fijos) + roles personalizados guardados en state
+const ROLES_BASE = [
+  { id:'fecha',    label:'📅 Fecha' },
+  { id:'concepto', label:'📝 Concepto' },
+  { id:'importe',  label:'💶 Importe (con signo)' },
+  { id:'cargo',    label:'➖ Cargo / gasto' },
+  { id:'abono',    label:'➕ Abono / ingreso' },
+  { id:'ignorar',  label:'🚫 Ignorar' },
+];
+
+// ═══ STATE ═══
+let state = { movimientos:[], partidas:[], reglas:[], bancos:[], historial:[], rolesExtra:[] };
 let gToken = null;
-let driveIds = { reglas: null, movimientos: null };
+let driveIds = { reglas:null, movimientos:null };
 let tokenClient = null;
 
-// ═══════════════════════════════════════════
-// PIN
-// ═══════════════════════════════════════════
+// ═══ IMPORT STATE ═══
+let parsedRows = [], parsedHeaders = [], parsedFileType = '';
+let pendingFilename = '';
+let currentBancoId = '';
+// colConfig: array parallel to parsedHeaders — { activa:bool, rol:string, rolLabel:string }
+let colConfig = [];
+
+// ═══ PIN ═══
 function onPinInput() {
   const v = document.getElementById('pinInput').value;
-  document.querySelectorAll('.pin-dot').forEach((d,i) => d.classList.toggle('filled', i < v.length));
-  document.getElementById('pinErr').textContent = '';
+  document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<v.length));
+  document.getElementById('pinErr').textContent='';
   document.getElementById('pinInput').classList.remove('shake');
-  if (v.length === 6) setTimeout(checkPin, 100);
+  if(v.length===6) setTimeout(checkPin,100);
 }
 function checkPin() {
-  const v = document.getElementById('pinInput').value;
-  if (v === PIN_CODE) {
+  const v=document.getElementById('pinInput').value;
+  if(v===PIN_CODE){
     sessionStorage.setItem('pin_ok','1');
-    document.getElementById('pinScreen').style.display = 'none';
-    // Check if already have Google token
-    const savedToken = sessionStorage.getItem('g_token');
-    if (savedToken) {
-      gToken = savedToken;
-      const name = sessionStorage.getItem('g_name')||'';
-      const email = sessionStorage.getItem('g_email')||'';
-      showAppDirectly(name, email);
-    } else {
-      document.getElementById('authScreen').style.display = 'flex';
-      initGoogleAuth();
-    }
+    document.getElementById('pinScreen').style.display='none';
+    const st=sessionStorage.getItem('g_token');
+    if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
+    else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
   } else {
-    const inp = document.getElementById('pinInput');
+    const inp=document.getElementById('pinInput');
     inp.classList.add('shake');
-    document.getElementById('pinErr').textContent = 'Código incorrecto';
-    inp.value = '';
-    document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
-    setTimeout(() => inp.focus(), 50);
+    document.getElementById('pinErr').textContent='Código incorrecto';
+    inp.value='';
+    document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('filled'));
+    setTimeout(()=>inp.focus(),50);
   }
 }
-
-window.addEventListener('load', () => {
-  if (sessionStorage.getItem('pin_ok') === '1') {
-    document.getElementById('pinScreen').style.display = 'none';
-    const savedToken = sessionStorage.getItem('g_token');
-    if (savedToken) {
-      gToken = savedToken;
-      showAppDirectly(sessionStorage.getItem('g_name')||'', sessionStorage.getItem('g_email')||'');
-    } else {
-      document.getElementById('authScreen').style.display = 'flex';
-      initGoogleAuth();
-    }
-  } else {
-    setTimeout(() => document.getElementById('pinInput').focus(), 200);
-  }
+window.addEventListener('load',()=>{
+  if(sessionStorage.getItem('pin_ok')==='1'){
+    document.getElementById('pinScreen').style.display='none';
+    const st=sessionStorage.getItem('g_token');
+    if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
+    else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
+  } else { setTimeout(()=>document.getElementById('pinInput').focus(),200); }
 });
 
-// ═══════════════════════════════════════════
-// GOOGLE AUTH (Token model — no popup blocker issues)
-// ═══════════════════════════════════════════
-function initGoogleAuth() {
-  // Wait for gsi to load
-  const wait = setInterval(() => {
-    if (typeof google !== 'undefined' && google.accounts) {
+// ═══ GOOGLE AUTH ═══
+function initGoogleAuth(){
+  const wait=setInterval(()=>{
+    if(typeof google!=='undefined'&&google.accounts){
       clearInterval(wait);
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: handleTokenResponse,
-      });
+      tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:handleTokenResponse});
     }
-  }, 200);
+  },200);
 }
-
-function startGoogleAuth() {
-  if (!tokenClient) { toast('Google no cargado aún, espera un momento','error'); return; }
-  tokenClient.requestAccessToken();
+function startGoogleAuth(){if(!tokenClient){toast('Google no cargado aún','error');return;}tokenClient.requestAccessToken();}
+async function handleTokenResponse(resp){
+  if(resp.error){toast('Error auth: '+resp.error,'error');return;}
+  gToken=resp.access_token;sessionStorage.setItem('g_token',gToken);
+  try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}});const u=await r.json();sessionStorage.setItem('g_name',u.name||'');sessionStorage.setItem('g_email',u.email||'');showAuthUser(u.name||'',u.email||'');}
+  catch(e){showAuthUser('Usuario Google','');}
 }
+function showAuthUser(name,email){document.getElementById('authUserInfo').style.display='flex';document.getElementById('authAvatar').textContent=name?name[0].toUpperCase():'G';document.getElementById('authName').innerHTML=name+'<small>'+email+'</small>';}
+function enterApp(){document.getElementById('authScreen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('topUser').textContent=sessionStorage.getItem('g_email')||'';init();}
+function showAppDirectly(name,email){document.getElementById('authScreen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('topUser').textContent=email;init();}
+function signOut(){if(typeof google!=='undefined'&&gToken)google.accounts.oauth2.revoke(gToken);sessionStorage.clear();location.reload();}
 
-async function handleTokenResponse(resp) {
-  if (resp.error) { toast('Error de autenticación: ' + resp.error, 'error'); return; }
-  gToken = resp.access_token;
-  sessionStorage.setItem('g_token', gToken);
-
-  // Get user info
-  try {
-    const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: 'Bearer ' + gToken }
-    });
-    const u = await r.json();
-    sessionStorage.setItem('g_name', u.name||'');
-    sessionStorage.setItem('g_email', u.email||'');
-    showAuthUser(u.name||'', u.email||'');
-  } catch(e) {
-    showAuthUser('Usuario Google', '');
-  }
-}
-
-function showAuthUser(name, email) {
-  document.getElementById('authUserInfo').style.display = 'flex';
-  document.getElementById('authAvatar').textContent = name ? name[0].toUpperCase() : 'G';
-  document.getElementById('authName').innerHTML = name + `<small>${email}</small>`;
-}
-
-function enterApp() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('topUser').textContent = sessionStorage.getItem('g_email')||'';
-  init();
-}
-
-function showAppDirectly(name, email) {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('topUser').textContent = email;
-  init();
-}
-
-function signOut() {
-  if (typeof google !== 'undefined' && gToken) google.accounts.oauth2.revoke(gToken);
-  sessionStorage.clear();
-  location.reload();
-}
-
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-async function init() {
-  if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  loadDriveIds();
-  setDriveStatus('loading');
+// ═══ INIT ═══
+async function init(){
+  if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  loadDriveIds();setDriveStatus('loading');
   await loadFromDrive();
-  renderAll();
-  setupDropZone();
+  renderAll();setupDropZone();
 }
+function loadDriveIds(){try{const s=localStorage.getItem('finanzas_drive_ids_v3');if(s)driveIds=JSON.parse(s);}catch(e){}}
+function saveDriveIds(){localStorage.setItem('finanzas_drive_ids_v3',JSON.stringify(driveIds));}
 
-function loadDriveIds() {
-  try { const s = localStorage.getItem('finanzas_drive_ids_v3'); if(s) driveIds = JSON.parse(s); } catch(e){}
-}
-function saveDriveIds() { localStorage.setItem('finanzas_drive_ids_v3', JSON.stringify(driveIds)); }
-
-// ═══════════════════════════════════════════
-// DRIVE API (Direct — no Anthropic proxy)
-// ═══════════════════════════════════════════
-async function driveRequest(url, options={}) {
-  if (!gToken) throw new Error('Sin token de Google');
-  const headers = { Authorization: 'Bearer ' + gToken, ...options.headers };
-  const r = await fetch(url, { ...options, headers });
-  if (r.status === 401) {
-    // Token expired — ask to re-auth
-    toast('Sesión Google expirada. Vuelve a conectar.','error');
-    sessionStorage.removeItem('g_token');
-    throw new Error('Token expirado');
-  }
+// ═══ DRIVE ═══
+async function driveRequest(url,options={}){
+  if(!gToken) throw new Error('Sin token');
+  const r=await fetch(url,{...options,headers:{Authorization:'Bearer '+gToken,...(options.headers||{})}});
+  if(r.status===401){toast('Sesión Google expirada','error');sessionStorage.removeItem('g_token');throw new Error('Token expirado');}
   return r;
 }
+async function driveSearch(name){const q=encodeURIComponent("name='"+name+"' and trashed=false");const r=await driveRequest('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id,name)');const d=await r.json();return d.files?.[0]?.id||null;}
+async function driveRead(id){const r=await driveRequest('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media');return await r.text();}
+async function driveCreate(name,content){const meta=JSON.stringify({name,mimeType:'application/json'});const body=new FormData();body.append('metadata',new Blob([meta],{type:'application/json'}));body.append('file',new Blob([content],{type:'application/json'}));const r=await driveRequest('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',body});const d=await r.json();return d.id;}
+async function driveUpdate(id,content){await driveRequest('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',{method:'PATCH',headers:{'Content-Type':'application/json'},body:content});}
 
-async function driveSearchFile(name) {
-  const q = encodeURIComponent(`name='${name}' and trashed=false`);
-  const r = await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-  const data = await r.json();
-  return data.files?.[0]?.id || null;
-}
-
-async function driveReadFile(fileId) {
-  const r = await driveRequest(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
-  return await r.text();
-}
-
-async function driveCreateFile(name, content) {
-  const meta = JSON.stringify({ name, mimeType: 'application/json' });
-  const body = new FormData();
-  body.append('metadata', new Blob([meta], { type: 'application/json' }));
-  body.append('file', new Blob([content], { type: 'application/json' }));
-  const r = await driveRequest('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-    method: 'POST', body
-  });
-  const data = await r.json();
-  return data.id;
-}
-
-async function driveUpdateFile(fileId, content) {
-  await driveRequest(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: content
-  });
-}
-
-async function loadFromDrive() {
-  try {
-    // Try to find files by name if no saved IDs
-    if (!driveIds.reglas) driveIds.reglas = await driveSearchFile(FILE_REGLAS);
-    if (!driveIds.movimientos) driveIds.movimientos = await driveSearchFile(FILE_MOVS);
+async function loadFromDrive(){
+  try{
+    if(!driveIds.reglas) driveIds.reglas=await driveSearch(FILE_REGLAS);
+    if(!driveIds.movimientos) driveIds.movimientos=await driveSearch(FILE_MOVS);
     saveDriveIds();
-
-    if (driveIds.reglas) {
-      const txt = await driveReadFile(driveIds.reglas);
-      const d = JSON.parse(txt);
-      state.partidas = d.partidas||[];
-      state.reglas = d.reglas||[];
-      state.bancos = d.bancos||[];
-      state.historial = d.historial||[];
-    }
-    if (driveIds.movimientos) {
-      const txt = await driveReadFile(driveIds.movimientos);
-      const d = JSON.parse(txt);
-      state.movimientos = d.movimientos||[];
-    }
+    if(driveIds.reglas){const t=await driveRead(driveIds.reglas);const d=JSON.parse(t);state.partidas=d.partidas||[];state.reglas=d.reglas||[];state.bancos=d.bancos||[];state.historial=d.historial||[];state.rolesExtra=d.rolesExtra||[];}
+    if(driveIds.movimientos){const t=await driveRead(driveIds.movimientos);const d=JSON.parse(t);state.movimientos=d.movimientos||[];}
     setDriveStatus('ok');
-  } catch(e) {
-    console.warn('Drive load:', e);
-    setDriveStatus('error');
-  }
-  if (!state.partidas.length) loadDefaults();
+  }catch(e){console.warn('Drive load:',e);setDriveStatus('error');}
+  if(!state.partidas.length) loadDefaults();
 }
-
-async function syncDrive() {
+async function syncDrive(){
   setDriveStatus('saving');
-  try {
-    const regContent = JSON.stringify({ partidas:state.partidas, reglas:state.reglas, bancos:state.bancos, historial:state.historial });
-    const movContent = JSON.stringify({ movimientos:state.movimientos });
-
-    if (driveIds.reglas) await driveUpdateFile(driveIds.reglas, regContent);
-    else { driveIds.reglas = await driveCreateFile(FILE_REGLAS, regContent); }
-
-    if (driveIds.movimientos) await driveUpdateFile(driveIds.movimientos, movContent);
-    else { driveIds.movimientos = await driveCreateFile(FILE_MOVS, movContent); }
-
-    saveDriveIds();
-    setDriveStatus('ok');
-    toast('Guardado en Drive ✓','success');
-  } catch(e) {
-    setDriveStatus('error');
-    toast('Error al guardar: ' + e.message,'error');
-  }
+  try{
+    const reg=JSON.stringify({partidas:state.partidas,reglas:state.reglas,bancos:state.bancos,historial:state.historial,rolesExtra:state.rolesExtra});
+    const mov=JSON.stringify({movimientos:state.movimientos});
+    if(driveIds.reglas) await driveUpdate(driveIds.reglas,reg); else driveIds.reglas=await driveCreate(FILE_REGLAS,reg);
+    if(driveIds.movimientos) await driveUpdate(driveIds.movimientos,mov); else driveIds.movimientos=await driveCreate(FILE_MOVS,mov);
+    saveDriveIds();setDriveStatus('ok');toast('Guardado en Drive ✓','success');
+  }catch(e){setDriveStatus('error');toast('Error al guardar: '+e.message,'error');}
 }
 
-// ═══════════════════════════════════════════
-// DEFAULTS
-// ═══════════════════════════════════════════
-function loadDefaults() {
-  state.partidas = [
+function loadDefaults(){
+  state.partidas=[
     {id:'alimentacion',nombre:'Alimentación',color:'#00e5a0',tipo:'gasto'},
     {id:'gasolina',nombre:'Gasolina',color:'#f5a623',tipo:'gasto'},
     {id:'nomina',nombre:'Nómina',color:'#4d9fff',tipo:'ingreso'},
@@ -713,408 +589,339 @@ function loadDefaults() {
     {id:'otros_gastos',nombre:'Otros gastos',color:'#74b9ff',tipo:'gasto'},
     {id:'otros_ingresos',nombre:'Otros ingresos',color:'#1dd1a1',tipo:'ingreso'},
   ];
-  state.reglas = [
-    {kw:'MERCADONA',partida:'alimentacion'},{kw:'LIDL',partida:'alimentacion'},
-    {kw:'CARREFOUR',partida:'alimentacion'},{kw:'ALCAMPO',partida:'alimentacion'},
-    {kw:'REPSOL',partida:'gasolina'},{kw:'CEPSA',partida:'gasolina'},
-    {kw:'BALLENOIL',partida:'gasolina'},{kw:'PETROPRIX',partida:'gasolina'},
-    {kw:'PLENERGY',partida:'gasolina'},{kw:'ENI PV',partida:'gasolina'},
-    {kw:'STAZIONE',partida:'gasolina'},{kw:'FAMILY ENERGY',partida:'gasolina'},
-    {kw:'NOMINA',partida:'nomina'},{kw:'TRANS INM/ AYUNTAMIENTO',partida:'nomina'},
-    {kw:'ENDESA',partida:'suministros'},{kw:'IBERDROLA',partida:'suministros'},
-    {kw:'VODAFONE',partida:'suministros'},
-    {kw:'HIPOTECA',partida:'hipoteca'},{kw:'SIERRAMAR',partida:'hipoteca'},
+  state.reglas=[
+    {kw:'MERCADONA',partida:'alimentacion'},{kw:'LIDL',partida:'alimentacion'},{kw:'CARREFOUR',partida:'alimentacion'},{kw:'ALCAMPO',partida:'alimentacion'},
+    {kw:'REPSOL',partida:'gasolina'},{kw:'CEPSA',partida:'gasolina'},{kw:'BALLENOIL',partida:'gasolina'},{kw:'PETROPRIX',partida:'gasolina'},{kw:'PLENERGY',partida:'gasolina'},{kw:'ENI PV',partida:'gasolina'},{kw:'FAMILY ENERGY',partida:'gasolina'},
+    {kw:'NOMINA',partida:'nomina'},{kw:'AYUNTAMIENTO DE MAR',partida:'nomina'},
+    {kw:'ENDESA',partida:'suministros'},{kw:'IBERDROLA',partida:'suministros'},{kw:'VODAFONE',partida:'suministros'},
+    {kw:'SIERRAMAR',partida:'hipoteca'},
     {kw:'FARMACIA',partida:'salud'},{kw:'PARASALUD',partida:'salud'},
     {kw:'ALLIANZ',partida:'seguros'},{kw:'LINEA DIRECTA',partida:'seguros'},
     {kw:'AUTOPISTA',partida:'ocio'},{kw:'AUCAT',partida:'ocio'},
   ];
-  state.bancos = [
+  state.bancos=[
     {id:'bankinter',nombre:'Bankinter',separador:';',encoding:'utf8',formato:'pdf'},
     {id:'ing',nombre:'ING',separador:';',encoding:'utf8',formato:'xlsx'},
     {id:'caixabank',nombre:'CaixaBank',separador:';',encoding:'latin1',formato:'csv'},
     {id:'bbva',nombre:'BBVA',separador:';',encoding:'utf8',formato:'csv'},
     {id:'santander',nombre:'Santander',separador:';',encoding:'utf8',formato:'csv'},
   ];
+  state.rolesExtra=[];
 }
 
-// ═══════════════════════════════════════════
-// FILE HANDLING
-// ═══════════════════════════════════════════
-let parsedRows=[], parsedHeaders=[], parsedFileType='';
-
-function setupDropZone() {
-  const dz = document.getElementById('dropZone');
-  dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('dragover');});
-  dz.addEventListener('dragleave', ()=>dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('dragover');handleFile(e.dataTransfer.files[0]);});
+// ═══ FILE HANDLING ═══
+function setupDropZone(){
+  const dz=document.getElementById('dropZone');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');handleFile(e.dataTransfer.files[0]);});
 }
 
-async function handleFile(file) {
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  parsedFileType = ext;
-  if (ext==='xlsx'||ext==='xls') await handleExcel(file);
-  else if (ext==='pdf') await handlePDF(file);
+async function handleFile(file){
+  if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  parsedFileType=ext;
+  if(ext==='xlsx'||ext==='xls') await handleExcel(file);
+  else if(ext==='pdf') await handlePDF(file);
   else await handleCSV(file);
 }
 
-async function handleCSV(file) {
-  const text = await readText(file, 'latin1');
-  parseCSVText(text, file.name);
-}
+function readText(file,enc){return new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsText(file,enc);});}
 
-function readText(file, enc) {
-  return new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsText(file,enc);});
-}
-
-function parseCSVText(text, filename) {
-  const lines = text.split(/\r?\n/).filter(l=>l.trim());
-  if (!lines.length) { toast('Archivo vacío','error'); return; }
-  const sep = lines[0].includes(';')?';':lines[0].includes('\t')?'\t':',';
+async function handleCSV(file){
+  const text=await readText(file,'latin1');
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length){toast('Archivo vacío','error');return;}
+  const sep=lines[0].includes(';')?';':lines[0].includes('\t')?'\t':',';
   let hi=0;
   for(let i=0;i<Math.min(10,lines.length);i++){if(lines[i].split(sep).length>=3){hi=i;break;}}
-  parsedHeaders = lines[hi].split(sep).map(h=>h.replace(/^["']|["']$/g,'').trim());
-  parsedRows = lines.slice(hi+1).filter(l=>l.trim()).map(l=>{
+  parsedHeaders=lines[hi].split(sep).map(h=>h.replace(/^["']|["']$/g,'').trim());
+  parsedRows=lines.slice(hi+1).filter(l=>l.trim()).map(l=>{
     const vals=splitLine(l,sep),obj={};
     parsedHeaders.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^["']|["']$/g,'').trim());
     return obj;
   });
-  showPreview(filename);
+  openBancoPicker(file.name);
 }
 
-function splitLine(line,sep){
-  const res=[];let cur='',inQ=false;
-  for(const c of line){if(c==='"'||c==="'"){inQ=!inQ;}else if(c===sep&&!inQ){res.push(cur);cur='';}else cur+=c;}
-  res.push(cur);return res;
-}
+function splitLine(line,sep){const res=[];let cur='',inQ=false;for(const c of line){if(c==='"'||c==="'"){inQ=!inQ;}else if(c===sep&&!inQ){res.push(cur);cur='';}else cur+=c;}res.push(cur);return res;}
 
-async function handleExcel(file) {
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, {type:"array", cellDates:true, cellNF:false, cellText:false});
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:"", raw:false, dateNF:"YYYY-MM-DD"});
-  if(!data.length){toast("Excel vacío","error");return;}
+async function handleExcel(file){
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array',cellDates:true,cellNF:false,cellText:false});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false,dateNF:'YYYY-MM-DD'});
+  if(!data.length){toast('Excel vacío','error');return;}
   let hi=0;
   for(let i=0;i<Math.min(10,data.length);i++){if(data[i].filter(c=>String(c).trim()).length>=3){hi=i;break;}}
-  parsedHeaders = data[hi].map(h=>String(h).trim()).filter(h=>h);
-  parsedRows = data.slice(hi+1).filter(r=>r.some(c=>String(c).trim())).map(r=>{
-    const obj={};parsedHeaders.forEach((h,i)=>{obj[h]=r[i]!==undefined?String(r[i]).trim():"";});return obj;
+  parsedHeaders=data[hi].map(h=>String(h).trim()).filter(h=>h);
+  parsedRows=data.slice(hi+1).filter(r=>r.some(c=>String(c).trim())).map(r=>{
+    const obj={};parsedHeaders.forEach((h,i)=>{obj[h]=r[i]!==undefined?String(r[i]).trim():'';});return obj;
   });
-  showPreview(file.name);
+  openBancoPicker(file.name);
 }
 
-async function handlePDF(file) {
+async function handlePDF(file){
   if(typeof pdfjsLib==='undefined'){toast('PDF.js no cargado','error');return;}
   document.getElementById('pdfProgress').style.display='block';
-  document.getElementById('previewCard').style.display='none';
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-  const n = pdf.numPages;
-  let lines = [];
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const n=pdf.numPages;
+  let lines=[];
   for(let i=1;i<=n;i++){
-    document.getElementById('pdfProgressMsg').textContent=`Página ${i} de ${n}…`;
+    document.getElementById('pdfProgressMsg').textContent='Página '+i+' de '+n+'…';
     document.getElementById('pdfProgressFill').style.width=((i/n)*100)+'%';
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    // Group items by Y position to reconstruct rows
-    const items = content.items;
-    const rows = {};
-    items.forEach(item=>{
-      const y = Math.round(item.transform[5]);
-      if(!rows[y]) rows[y]=[];
-      rows[y].push({x:item.transform[4], text:item.str});
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    const rowsY={};
+    content.items.forEach(item=>{
+      const y=Math.round(item.transform[5]);
+      if(!rowsY[y]) rowsY[y]=[];
+      rowsY[y].push({x:item.transform[4],text:item.str});
     });
-    Object.keys(rows).sort((a,b)=>b-a).forEach(y=>{
-      const row = rows[y].sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ');
-      if(row.trim()) lines.push(row.trim());
+    Object.keys(rowsY).sort((a,b)=>b-a).forEach(y=>{
+      const row=rowsY[y].sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').trim();
+      if(row) lines.push(row);
     });
   }
   document.getElementById('pdfProgress').style.display='none';
-  parseBankinterPDF(lines, file.name);
+  parseBankinterPDF(lines,file.name);
 }
 
-// Bankinter PDF parser — specifically designed for their format
-// Columns: Fecha | Referencia | Fecha valor | Descripción | Cargos(-) | Abonos(+) | Saldo
-function parseBankinterPDF(lines, filename) {
-  // Regex: line starting with DD-MM-YY followed by ref number
-  const rowRe = /^(\d{2}-\d{2}-\d{2})\s+(\d+)\s+(\d{2}-\d{2}-\d{2})\s+(.+?)\s+([\d\.]+,\d{2})?\s*([\d\.]+,\d{2})?\s*([\d\.,]+[\s\-]*)$/;
-  // Simpler: detect date at start
-  const dateRe = /^(\d{2}-\d{2}-\d{2})/;
-
-  parsedHeaders = ['Fecha','Descripción','Cargos','Abonos'];
-  parsedRows = [];
-
-  lines.forEach(line => {
-    if (!dateRe.test(line)) return;
-    // Skip saldo lines
-    if (/SALDO/i.test(line)) return;
-
-    const parts = line.split(/\s+/);
-    if (parts.length < 4) return;
-
-    const fecha = parts[0];
-    // Skip if second part is not a reference number
-    if (!/^\d+$/.test(parts[1])) return;
-
-    // fecha_valor is parts[2] (format DD-MM-YY)
-    // Everything between fecha_valor and numbers at end is descripción
-    // Find amounts at end — numbers with comma decimal
-    const amtRe = /([\d\.]+,\d{2})/g;
-    const amounts = [...line.matchAll(amtRe)].map(m=>m[1]);
-
-    // Remove fecha, ref, fecha_valor from start
-    let rest = line.replace(/^\d{2}-\d{2}-\d{2}\s+\d+\s+\d{2}-\d{2}-\d{2}\s+/,'').trim();
-    // Remove trailing amounts and saldo
-    amounts.slice(-2).forEach(a => { rest = rest.replace(a,'').trim(); });
-    const desc = rest.replace(/[\d\.]+,\d{2}/g,'').replace(/\s+/g,' ').trim();
-
-    let cargo='', abono='';
-    if (amounts.length >= 3) { cargo=amounts[amounts.length-3]||''; abono=''; }
-    else if (amounts.length === 2) { cargo=amounts[0]; abono=''; }
-    else if (amounts.length === 1) { cargo=amounts[0]; }
-
-    // Distinguish cargo/abono: look at the original line positions
-    // If abono column has a value it appears between cargo and saldo
-    // We'll use a positional approach
-    const posRe = /^(\d{2}-\d{2}-\d{2})\s+\d+\s+(\d{2}-\d{2}-\d{2})\s+(.+?)\s{2,}([\d\.]+,\d{2})?\s{2,}([\d\.]+,\d{2})?\s{2,}([\d\.]+,\d{2})/;
-    const m = line.match(posRe);
-    if (m) {
-      const c = m[4]||'', ab = m[5]||'';
-      parsedRows.push({ Fecha: m[1], Descripción: m[3].trim(), Cargos: c, Abonos: ab });
-    } else if (desc) {
-      parsedRows.push({ Fecha: fecha, Descripción: desc, Cargos: cargo, Abonos: '' });
+function parseBankinterPDF(lines,filename){
+  const dateRe=/^(\d{2}-\d{2}-\d{2})/;
+  parsedHeaders=['Fecha','Descripción','Cargos','Abonos'];
+  parsedRows=[];
+  lines.forEach(line=>{
+    if(!dateRe.test(line)||/SALDO/i.test(line)) return;
+    const parts=line.split(/\s+/);
+    if(parts.length<4||!/^\d+$/.test(parts[1])) return;
+    const posRe=/^(\d{2}-\d{2}-\d{2})\s+\d+\s+\d{2}-\d{2}-\d{2}\s+(.+?)\s{2,}([\d\.]+,\d{2})?\s{0,}([\d\.]+,\d{2})?\s{0,}[\d\.]+,\d{2}/;
+    const m=line.match(posRe);
+    if(m){
+      parsedRows.push({Fecha:m[1],Descripción:m[2].trim(),Cargos:m[3]||'',Abonos:m[4]||''});
+    } else {
+      const amts=[...line.matchAll(/([\d\.]+,\d{2})/g)].map(x=>x[1]);
+      const desc=line.replace(/^\d{2}-\d{2}-\d{2}\s+\d+\s+\d{2}-\d{2}-\d{2}\s+/,'').replace(/[\d\.]+,\d{2}/g,'').replace(/\s+/g,' ').trim();
+      if(desc) parsedRows.push({Fecha:parts[0],Descripción:desc,Cargos:amts[0]||'',Abonos:''});
     }
   });
-
-  if (!parsedRows.length) {
-    // Fallback: generic parsing
-    parsedHeaders = ['Fecha','Descripción','Importe'];
-    parsedRows = lines.filter(l=>dateRe.test(l)&&!/SALDO/i.test(l)).map(l=>{
-      const parts = l.split(/\s+/);
-      const fecha = parts[0];
-      const amts = [...l.matchAll(/([\d\.]+,\d{2})/g)].map(m=>m[1]);
-      const imp = amts[0]||'';
-      const desc = l.replace(/\d{2}-\d{2}-\d{2}/g,'').replace(/[\d\.]+,\d{2}/g,'').replace(/\s+/g,' ').trim();
-      return {Fecha:fecha, Descripción:desc, Importe:imp};
+  if(!parsedRows.length){
+    parsedHeaders=['Fecha','Descripción','Importe'];
+    parsedRows=lines.filter(l=>dateRe.test(l)&&!/SALDO/i.test(l)).map(l=>{
+      const amts=[...l.matchAll(/([\d\.]+,\d{2})/g)].map(x=>x[1]);
+      const desc=l.replace(/\d{2}-\d{2}-\d{2}/g,'').replace(/[\d\.]+,\d{2}/g,'').replace(/\s+/g,' ').trim();
+      return{Fecha:l.match(dateRe)[1],Descripción:desc,Importe:amts[0]||''};
     }).filter(r=>r.Descripción);
   }
-
-  showPreview(filename);
-}
-
-let pendingFilename = '';
-
-function showPreview(filename) {
-  pendingFilename = filename;
-  // Always ask which bank first
   openBancoPicker(filename);
 }
 
-function openBancoPicker(filename) {
-  const ext = filename.split('.').pop().toLowerCase();
-  // Build picker list — highlight banks matching file extension
-  const grid = document.getElementById('bancoPicker');
-  grid.innerHTML = state.bancos.map(b => {
-    const match = b.formato === ext;
-    return `<button class="banco-picker-btn" style="${match?'border-color:var(--accent);':''}" onclick="seleccionarBanco('${b.id}')">
-      <span>${b.nombre}</span>
-      <span class="banco-fmt ${b.formato||'csv'}">${(b.formato||'csv').toUpperCase()}</span>
-    </button>`;
+// ═══ BANCO PICKER ═══
+function openBancoPicker(filename){
+  pendingFilename=filename;
+  const ext=filename.split('.').pop().toLowerCase();
+  const grid=document.getElementById('bancoPicker');
+  grid.innerHTML=state.bancos.map(b=>{
+    const match=b.formato===ext|||(ext==='xls'&&b.formato==='xlsx');
+    return '<button class="banco-picker-btn" style="'+(match?'border-color:var(--accent);':'')+'" onclick="seleccionarBanco(\''+b.id+'\')">'
+      +'<span>'+b.nombre+'</span>'
+      +'<span class="bfmt '+(b.formato||'csv')+'">'+(b.formato||'csv').toUpperCase()+'</span>'
+      +'</button>';
   }).join('');
   document.getElementById('nuevoBancoForm').classList.remove('show');
-  document.getElementById('nuevoBancoNombre').value = '';
-  // Auto-detect formato for new banco
-  document.getElementById('nuevoBancoFormato').value = ext==='pdf'?'pdf':ext==='xlsx'||ext==='xls'?'xlsx':'csv';
-  document.getElementById('modalBanco').style.display = 'flex';
+  document.getElementById('nuevoBancoNombre').value='';
+  document.getElementById('nuevoBancoFormato').value=ext==='pdf'?'pdf':(ext==='xlsx'||ext==='xls'?'xlsx':'csv');
+  document.getElementById('modalBanco').style.display='flex';
+}
+function seleccionarBanco(id){cerrarModal('modalBanco');currentBancoId=id;buildColMapping();}
+function toggleNuevoBanco(){document.getElementById('nuevoBancoForm').classList.toggle('show');if(document.getElementById('nuevoBancoForm').classList.contains('show'))setTimeout(()=>document.getElementById('nuevoBancoNombre').focus(),50);}
+function crearYSeleccionarBanco(){
+  const nombre=document.getElementById('nuevoBancoNombre').value.trim();
+  if(!nombre){toast('Escribe el nombre del banco','error');return;}
+  const formato=document.getElementById('nuevoBancoFormato').value;
+  const nb={id:uid(),nombre,separador:';',encoding:'utf8',formato};
+  state.bancos.push(nb);renderBancos();syncDrive();
+  cerrarModal('modalBanco');currentBancoId=nb.id;buildColMapping();
+  toast('Banco "'+nombre+'" creado','success');
 }
 
-function seleccionarBanco(bancoId) {
-  cerrarModal('modalBanco');
-  buildPreview(pendingFilename, bancoId);
+// ═══ COLUMN MAPPING ═══
+function allRoles(){
+  return [...ROLES_BASE,...state.rolesExtra.map(r=>({id:'custom_'+r,label:'🏷️ '+r}))];
 }
 
-function toggleNuevoBanco() {
-  document.getElementById('nuevoBancoForm').classList.toggle('show');
-  if (document.getElementById('nuevoBancoForm').classList.contains('show')) {
-    setTimeout(() => document.getElementById('nuevoBancoNombre').focus(), 50);
-  }
+function autoDetectRole(header){
+  const h=header.toLowerCase().replace(/[^a-záéíóúñ\s]/gi,'').trim();
+  if(/f.*valor|fecha|date|fech|dia/.test(h)) return 'fecha';
+  if(/descripci|concepto|movimiento|detalle/.test(h)) return 'concepto';
+  if(/importe(?!\s*\(€\).*saldo)/.test(h)||/cantidad|amount/.test(h)) return 'importe';
+  if(/cargo|debito/.test(h)) return 'cargo';
+  if(/abono|credito/.test(h)) return 'abono';
+  if(/saldo|categor|subcat|comentario|comment/.test(h)) return 'ignorar';
+  return 'ignorar';
 }
 
-function crearYSeleccionarBanco() {
-  const nombre = document.getElementById('nuevoBancoNombre').value.trim();
-  if (!nombre) { toast('Escribe el nombre del banco','error'); return; }
-  const formato = document.getElementById('nuevoBancoFormato').value;
-  const newBanco = { id: uid(), nombre, separador:';', encoding:'utf8', formato };
-  state.bancos.push(newBanco);
-  cerrarModal('modalBanco');
-  renderBancos();
-  syncDrive();
-  buildPreview(pendingFilename, newBanco.id);
-  toast(`Banco "${nombre}" creado`,'success');
-}
-
-// colMapping: { fecha, concepto, importe, cargo, abono } — set by visual UI
-let colMapping = {};
-let currentBancoId = '';
-
-function buildPreview(filename, bancoId) {
-  currentBancoId = bancoId;
-  document.getElementById('previewCard').style.display='block';
-  const ext = filename.split('.').pop().toLowerCase();
-  document.getElementById('previewFileName').innerHTML = filename + ' <span class="file-type-badge ' + ext + '">' + ext.toUpperCase() + '</span>';
-
-  // Auto-detect column roles
-  colMapping = autoDetect(parsedHeaders);
-
-  renderColMappingUI();
-}
-
-function autoDetect(headers) {
-  const n = h => h.toLowerCase().replace(/[^a-záéíóúñ\s]/gi,'');
-  const find = (...kws) => headers.find(h => kws.some(k => n(h).includes(k))) || null;
-  return {
-    fecha:   find('f. valor','fecha valor','fecha','date','fech','dia') || headers[0],
-    concepto:find('descripci','concepto','movimiento','detalle') || headers[1],
-    importe: find('importe') || find('cantidad','amount','euros') || null,
-    cargo:   find('cargo','debito','cargos') || null,
-    abono:   find('abono','credito','abonos') || null,
-    ignorar: []
-  };
-}
-
-function renderColMappingUI() {
-  const prev = document.getElementById('previewContent');
-
-  // Role options for each column dropdown
-  const roleOpts = [
-    {val:'fecha',    label:'📅 Fecha'},
-    {val:'concepto', label:'📝 Concepto'},
-    {val:'importe',  label:'💶 Importe (con signo)'},
-    {val:'cargo',    label:'➖ Cargo (gasto)'},
-    {val:'abono',    label:'➕ Abono (ingreso)'},
-    {val:'ignorar',  label:'🚫 Ignorar'},
-  ];
-
-  // Build active role map for quick lookup
-  const getRoleOf = col => {
-    if (col === colMapping.fecha) return 'fecha';
-    if (col === colMapping.concepto) return 'concepto';
-    if (col === colMapping.importe) return 'importe';
-    if (col === colMapping.cargo) return 'cargo';
-    if (col === colMapping.abono) return 'abono';
-    return 'ignorar';
-  };
-
-  // Sample rows (up to 5)
-  const sampleRows = parsedRows.slice(0, 5);
-
-  let html = '<p style="font-size:12px;color:var(--text2);margin-bottom:12px">' + parsedRows.length + ' filas detectadas — asigna el rol de cada columna:</p>';
-  html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
-
-  // Header row with role selectors
-  html += '<thead><tr>';
-  parsedHeaders.forEach((h, ci) => {
-    const role = getRoleOf(h);
-    const selOpts = roleOpts.map(o => '<option value="' + o.val + '"' + (o.val===role?' selected':'') + '>' + o.label + '</option>').join('');
-    html += '<th style="padding:6px 8px;border:1px solid var(--border);background:var(--surface2);min-width:130px;vertical-align:top">';
-    html += '<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + h + '">' + h + '</div>';
-    html += '<select style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:3px 4px;font-size:11px;font-family:var(--font-body)" onchange="updateColRole(' + ci + ',this.value)">' + selOpts + '</select>';
-    html += '</th>';
+function buildColMapping(){
+  // Build colConfig: one entry per header
+  colConfig=parsedHeaders.map(h=>{
+    const rol=autoDetectRole(h);
+    return {activa: rol!=='ignorar', rol, custom:false};
   });
-  html += '</tr></thead><tbody>';
+  renderColMapping();
+  document.getElementById('previewCard').style.display='block';
+  const ext=pendingFilename.split('.').pop().toLowerCase();
+  const banco=state.bancos.find(b=>b.id===currentBancoId);
+  document.getElementById('previewTitle').innerHTML=
+    pendingFilename+' <span class="file-type-badge '+ext+'">'+ext.toUpperCase()+'</span>'
+    +' &nbsp;·&nbsp; <span style="color:var(--accent)">'+( banco?.nombre||currentBancoId)+'</span>'
+    +' <a href="#" onclick="openBancoPicker(pendingFilename);return false" style="font-size:11px;color:var(--accent3);margin-left:6px">cambiar banco</a>';
+}
+
+function renderColMapping(){
+  const roles=allRoles();
+  const sampleRows=parsedRows.slice(0,5);
+
+  // Role color map
+  const roleColor={fecha:'var(--accent3)',concepto:'var(--text)',importe:'var(--income)',cargo:'var(--accent2)',abono:'var(--income)',ignorar:'var(--text3)'};
+
+  let html='<p style="font-size:12px;color:var(--text2);margin-bottom:10px">'+parsedRows.length+' filas detectadas. '
+    +'Activa o desactiva cada columna y asigna su rol:</p>';
+  html+='<div style="overflow-x:auto"><table class="col-map-table">';
+
+  // Header row
+  html+='<thead><tr>';
+  parsedHeaders.forEach((h,ci)=>{
+    const cfg=colConfig[ci];
+    const rolColor=cfg.activa?(roleColor[cfg.rol]||'var(--accent)') :'var(--text3)';
+    const roleOpts=roles.map(r=>'<option value="'+r.id+'"'+(r.id===cfg.rol?' selected':'')+'>'+r.label+'</option>').join('');
+    html+='<th class="col-map-th" style="opacity:'+(cfg.activa?'1':'.45')+'">';
+    // Header name
+    html+='<div class="col-map-name" title="'+h+'" style="color:'+rolColor+'">'+h+'</div>';
+    // Checkbox
+    html+='<div class="col-map-check">'
+      +'<input type="checkbox" '+(cfg.activa?'checked':'')+' onchange="toggleCol('+ci+',this.checked)">'
+      +'<span>Importar</span></div>';
+    // Role selector
+    html+='<select class="col-map-sel" '+(cfg.activa?'':'disabled')+' onchange="changeRole('+ci+',this.value)">'+roleOpts+'</select>';
+    // New role input (shown when selecting "nuevo_rol")
+    html+='<input type="text" class="new-rol-input" id="newRolInput_'+ci+'" placeholder="Nombre del rol..." onblur="confirmNuevoRol('+ci+',this)" onkeydown="if(event.key===\'Enter\')confirmNuevoRol('+ci+',this)">';
+    html+='</th>';
+  });
+  html+='</tr></thead>';
 
   // Sample data rows
-  sampleRows.forEach(row => {
-    html += '<tr>';
-    parsedHeaders.forEach(h => {
-      const role = getRoleOf(h);
-      const color = role==='fecha'?'var(--accent3)':role==='concepto'?'var(--text)':role==='importe'||role==='cargo'||role==='abono'?'var(--income)':'var(--text3)';
-      html += '<td style="padding:5px 8px;border:1px solid var(--border);color:' + color + ';white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="' + (row[h]||'') + '">' + (row[h]||'<span style=\'color:var(--text3)\'>—</span>') + '</td>';
+  html+='<tbody>';
+  sampleRows.forEach(row=>{
+    html+='<tr>';
+    parsedHeaders.forEach((h,ci)=>{
+      const cfg=colConfig[ci];
+      const color=cfg.activa?(roleColor[cfg.rol]||'var(--text)'):'var(--text3)';
+      const val=row[h]||'';
+      html+='<td class="col-map-td'+(cfg.activa?' active':'')+'" style="color:'+color+'" title="'+val+'">'+val+'</td>';
     });
-    html += '</tr>';
+    html+='</tr>';
   });
+  html+='</tbody></table></div>';
 
-  html += '</tbody></table></div>';
-
-  // Decimal selector + banco info
-  html += '<div style="display:flex;gap:12px;margin-top:14px;align-items:center;flex-wrap:wrap">';
-  html += '<div class="field-group" style="flex:0 0 auto"><label class="field-label">Separador decimal</label><select class="field-input" id="colDecimal"><option value="coma">Coma (1.234,56)</option><option value="punto">Punto (1,234.56)</option></select></div>';
-  const bancoActual = state.bancos.find(b=>b.id===currentBancoId);
-  html += '<div style="font-size:12px;color:var(--text2);margin-top:18px">Banco: <strong style="color:var(--accent)">' + (bancoActual?.nombre||currentBancoId) + '</strong> — <a href="#" onclick="cerrarModal(\'modalBanco\');openBancoPicker(pendingFilename);return false" style="color:var(--accent3);font-size:11px">cambiar</a></div>';
-  html += '</div>';
-
-  prev.innerHTML = html;
+  document.getElementById('previewContent').innerHTML=html;
 }
 
-function updateColRole(colIdx, role) {
-  const col = parsedHeaders[colIdx];
-  // Remove this col from any existing role
-  if (colMapping.fecha === col) colMapping.fecha = null;
-  if (colMapping.concepto === col) colMapping.concepto = null;
-  if (colMapping.importe === col) colMapping.importe = null;
-  if (colMapping.cargo === col) colMapping.cargo = null;
-  if (colMapping.abono === col) colMapping.abono = null;
-  // Assign new role (only one col per role, except ignorar)
-  if (role !== 'ignorar') {
-    // Clear previous assignment of same role
-    if (role === 'fecha') colMapping.fecha = col;
-    else if (role === 'concepto') colMapping.concepto = col;
-    else if (role === 'importe') colMapping.importe = col;
-    else if (role === 'cargo') colMapping.cargo = col;
-    else if (role === 'abono') colMapping.abono = col;
+function toggleCol(ci,checked){
+  colConfig[ci].activa=checked;
+  renderColMapping();
+}
+
+function changeRole(ci,val){
+  if(val==='__nuevo__'){
+    // Show text input for new role
+    const inp=document.getElementById('newRolInput_'+ci);
+    if(inp){inp.style.display='block';inp.focus();}
+    return;
   }
-  renderColMappingUI();
+  colConfig[ci].rol=val;
+  renderColMapping();
 }
 
-function importarDatos() {
-  const colF = colMapping.fecha;
-  const colC = colMapping.concepto;
-  const colI = colMapping.importe;
-  const colCargo = colMapping.cargo;
-  const colAbono = colMapping.abono;
-  const banco = currentBancoId;
-  const decimalEl = document.getElementById('colDecimal');
-  const decimal = decimalEl ? decimalEl.value : 'coma';
-  const bancoObj = state.bancos.find(b=>b.id===banco);
-  const bancoNombre = bancoObj?.nombre || banco;
+function confirmNuevoRol(ci,inp){
+  const nombre=inp.value.trim();
+  if(!nombre) return;
+  // Add to rolesExtra if not exists
+  if(!state.rolesExtra.includes(nombre)) state.rolesExtra.push(nombre);
+  const newId='custom_'+nombre;
+  colConfig[ci].rol=newId;
+  syncDrive();
+  renderColMapping();
+}
 
-  if (!colF) { toast('Asigna la columna de Fecha','error'); return; }
-  if (!colC) { toast('Asigna la columna de Concepto','error'); return; }
-  if (!colI && !colCargo && !colAbono) { toast('Asigna al menos una columna de importe','error'); return; }
+// Add "nuevo rol" option to all role selects after render
+// (We inject it as last option in each select)
+// We do this by including it in allRoles:
+const _origAllRoles=allRoles;
+// Override to add the "+ Nuevo rol" sentinel at the end
+function allRoles(){
+  const base=[...ROLES_BASE,...state.rolesExtra.map(r=>({id:'custom_'+r,label:'🏷️ '+r}))];
+  base.push({id:'__nuevo__',label:'+ Nuevo rol…'});
+  return base;
+}
 
-  let nuevos=0, duplicados=0;
-  parsedRows.forEach(row => {
+// ═══ IMPORTAR ═══
+function importarDatos(){
+  const decimal=document.getElementById('colDecimal').value;
+  const banco=currentBancoId;
+  const bancoNombre=state.bancos.find(b=>b.id===banco)?.nombre||banco;
+
+  // Validate required roles exist
+  const activeCols=colConfig.map((c,i)=>({...c,header:parsedHeaders[i]})).filter(c=>c.activa);
+  const hasF=activeCols.find(c=>c.rol==='fecha');
+  const hasC=activeCols.find(c=>c.rol==='concepto');
+  const hasI=activeCols.find(c=>c.rol==='importe'||c.rol==='cargo'||c.rol==='abono');
+  if(!hasF){toast('Marca al menos una columna como Fecha','error');return;}
+  if(!hasC){toast('Marca al menos una columna como Concepto','error');return;}
+  if(!hasI){toast('Marca al menos una columna de importe (Importe, Cargo o Abono)','error');return;}
+
+  const colFecha=hasF.header;
+  // Concepto: concatenar todas las columnas con rol 'concepto'
+  const colsConcepto=activeCols.filter(c=>c.rol==='concepto').map(c=>c.header);
+  const colImporte=activeCols.find(c=>c.rol==='importe')?.header||null;
+  const colCargo=activeCols.find(c=>c.rol==='cargo')?.header||null;
+  const colAbono=activeCols.find(c=>c.rol==='abono')?.header||null;
+  // Extra roles: se añaden al concepto como metadatos adicionales separados por ' | '
+  const colsExtra=activeCols.filter(c=>c.rol.startsWith('custom_')).map(c=>c.header);
+
+  let nuevos=0,duplicados=0;
+  parsedRows.forEach(row=>{
     let importe=0;
-    if (colI && row[colI]) {
-      importe = parseImporte(row[colI], decimal);
-    } else if (colCargo || colAbono) {
-      const c = colCargo ? parseImporte(row[colCargo]||'0', decimal) : 0;
-      const a = colAbono ? parseImporte(row[colAbono]||'0', decimal) : 0;
-      importe = a - Math.abs(c);
+    if(colImporte&&row[colImporte]) importe=parseImporte(row[colImporte],decimal);
+    else if(colCargo||colAbono){
+      const c=colCargo?parseImporte(row[colCargo]||'0',decimal):0;
+      const a=colAbono?parseImporte(row[colAbono]||'0',decimal):0;
+      importe=a-Math.abs(c);
     }
-    const fecha = normFecha(row[colF]||'');
-    const concepto = (row[colC]||'').trim();
-    if (!concepto && !importe) return;
-    const hash = fecha+'_'+concepto+'_'+importe+'_'+banco;
-    if (state.movimientos.some(m=>m.hash===hash)) { duplicados++; return; }
-    const partida = aplicarReglas(concepto);
+    const fecha=normFecha(row[colFecha]||'');
+    const partsConcepto=colsConcepto.map(h=>row[h]||'').filter(Boolean);
+    const partsExtra=colsExtra.map(h=>row[h]||'').filter(Boolean);
+    const concepto=[...partsConcepto,...partsExtra].join(' | ').trim();
+    if(!concepto&&!importe) return;
+    const hash=fecha+'_'+concepto+'_'+importe+'_'+banco;
+    if(state.movimientos.some(m=>m.hash===hash)){duplicados++;return;}
+    const partida=aplicarReglas(concepto);
     state.movimientos.push({id:uid(),hash,fecha,concepto,importe,banco,bancoNombre,partida,importadoEn:new Date().toISOString()});
     nuevos++;
   });
 
   state.historial.unshift({fecha:new Date().toISOString().substring(0,10),banco:bancoNombre,tipo:parsedFileType.toUpperCase(),nuevos,duplicados});
-  if (state.historial.length>50) state.historial.pop();
-  cancelarPreview();
-  renderAll();
-  toast('✓ ' + nuevos + ' movimientos importados' + (duplicados?' ('+duplicados+' dup.)':''), 'success');
+  if(state.historial.length>50) state.historial.pop();
+  cancelarPreview();renderAll();
+  toast('✓ '+nuevos+' movimientos importados'+(duplicados?' ('+duplicados+' dup.)':''),'success');
   syncDrive();
 }
 
-function cancelarPreview(){document.getElementById('previewCard').style.display='none';document.getElementById('fileInput').value='';parsedRows=[];parsedHeaders=[];}
+function cancelarPreview(){document.getElementById('previewCard').style.display='none';document.getElementById('fileInput').value='';parsedRows=[];parsedHeaders=[];colConfig=[];}
 
 function parseImporte(str,decimal){
   if(!str) return 0;
-  let s=String(str).trim().replace(/\s/g,'').replace(/[€$]/g,'').replace(/-$/,'');
+  let s=String(str).trim().replace(/\s/g,'').replace(/[€$]/g,'').replace(/-\s*$/,'');
   if(decimal==='coma'){s=s.replace(/\./g,'').replace(',','.');}else{s=s.replace(/,/g,'');}
   return parseFloat(s)||0;
 }
@@ -1122,21 +929,21 @@ function parseImporte(str,decimal){
 function normFecha(str){
   if(!str) return '';
   str=String(str).trim();
-  if(/^\d{5}$/.test(str)){const d=new Date((parseInt(str)-25569)*86400000);return d.toISOString().substring(0,10);}
+  // Already YYYY-MM-DD (from Excel with dateNF)
+  if(/^\d{4}-\d{2}-\d{2}/.test(str)) return str.substring(0,10);
   // DD-MM-YY (Bankinter)
   let m=str.match(/^(\d{2})-(\d{2})-(\d{2})$/);
-  if(m) return `20${m[3]}-${m[2]}-${m[1]}`;
+  if(m) return '20'+m[3]+'-'+m[2]+'-'+m[1];
   // DD/MM/YYYY or DD-MM-YYYY
   m=str.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
-  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+  // YYYY-MM-DD
   m=str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-  if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  if(m) return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
   return str;
 }
 
-// ═══════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════
+// ═══ RENDER ALL ═══
 function renderAll(){renderDashboard();renderMovimientos();renderPartidas();renderReglas();renderBancos();renderFiltros();renderHistorial();renderPeriodos();}
 
 let periodoActivo='todo';
@@ -1160,40 +967,25 @@ function renderDashboard(){
   const movs=filtrarPeriodo(state.movimientos);
   const ing=movs.filter(m=>m.importe>0),gas=movs.filter(m=>m.importe<0),sinC=movs.filter(m=>!m.partida);
   const sumI=ing.reduce((s,m)=>s+m.importe,0),sumG=Math.abs(gas.reduce((s,m)=>s+m.importe,0)),bal=sumI-sumG;
-  document.getElementById('sumIngresos').textContent=fmt(sumI);
-  document.getElementById('sumIngresosN').textContent=`${ing.length} movimientos`;
-  document.getElementById('sumGastos').textContent=fmt(sumG);
-  document.getElementById('sumGastosN').textContent=`${gas.length} movimientos`;
-  document.getElementById('sumBalance').textContent=fmt(bal);
-  document.getElementById('sumBalanceSub').textContent=bal>=0?'Superávit':'Déficit';
+  document.getElementById('sumIngresos').textContent=fmt(sumI);document.getElementById('sumIngresosN').textContent=ing.length+' movimientos';
+  document.getElementById('sumGastos').textContent=fmt(sumG);document.getElementById('sumGastosN').textContent=gas.length+' movimientos';
+  document.getElementById('sumBalance').textContent=fmt(bal);document.getElementById('sumBalanceSub').textContent=bal>=0?'Superávit':'Déficit';
   document.getElementById('sumSinClasificar').textContent=sinC.length;
-  renderChart('chartGastos',movs.filter(m=>m.importe<0));
-  renderChart('chartIngresos',movs.filter(m=>m.importe>0));
+  renderChart('chartGastos',movs.filter(m=>m.importe<0));renderChart('chartIngresos',movs.filter(m=>m.importe>0));
   const cont=document.getElementById('sinClasificarList');
   if(!sinC.length){cont.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><p>Todos clasificados</p></div>';return;}
-  cont.innerHTML=sinC.slice(0,10).map(m=>`
-    <div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span class="td-date">${m.fecha||''}</span>
-      <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.concepto||''}</span>
-      <span class="td-amount ${m.importe>=0?'pos':'neg'}">${fmt(m.importe)}</span>
-      <select class="partida-select" onchange="asignarPartida('${m.id}',this.value)">${opcionesBadge('')}</select>
-    </div>`).join('');
+  cont.innerHTML=sinC.slice(0,10).map(m=>'<div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span class="td-date">'+m.fecha+'</span><span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+m.concepto+'</span><span class="td-amount '+(m.importe>=0?'pos':'neg')+'">'+fmt(m.importe)+'</span><select class="partida-select" onchange="asignarPartida(\''+m.id+'\',this.value)">'+opcionesBadge('')+'</select></div>').join('');
 }
 
 function renderChart(id,movs){
   const cont=document.getElementById(id);
   if(!movs.length){cont.innerHTML='<div class="empty-state" style="padding:20px"><p>Sin datos</p></div>';return;}
   const byP={};movs.forEach(m=>{const k=m.partida||'__sin__';byP[k]=(byP[k]||0)+Math.abs(m.importe);});
-  const sorted=Object.entries(byP).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const max=sorted[0]?.[1]||1;
-  cont.innerHTML=sorted.map(([pid,total])=>{
-    const p=state.partidas.find(x=>x.id===pid);
-    return `<div class="bar-item"><div class="bar-label" title="${p?.nombre||'Sin clasificar'}">${p?.nombre||'Sin clasificar'}</div><div class="bar-track"><div class="bar-fill" style="width:${(total/max*100).toFixed(1)}%;background:${p?.color||'#4a5568'}"></div></div><div class="bar-amount">${fmt(total)}</div></div>`;
-  }).join('');
+  const sorted=Object.entries(byP).sort((a,b)=>b[1]-a[1]).slice(0,10);const max=sorted[0]?.[1]||1;
+  cont.innerHTML=sorted.map(([pid,total])=>{const p=state.partidas.find(x=>x.id===pid);return '<div class="bar-item"><div class="bar-label" title="'+(p?.nombre||'Sin clasificar')+'">'+(p?.nombre||'Sin clasificar')+'</div><div class="bar-track"><div class="bar-fill" style="width:'+(total/max*100).toFixed(1)+'%;background:'+(p?.color||'#4a5568')+'"></div></div><div class="bar-amount">'+fmt(total)+'</div></div>';}).join('');
 }
 
-let movsSort={col:'fecha',dir:-1},movsPage=1;
-const PER_PAGE=50;
+let movsSort={col:'fecha',dir:-1},movsPage=1;const PER_PAGE=50;
 function sortMovs(col){if(movsSort.col===col)movsSort.dir*=-1;else{movsSort.col=col;movsSort.dir=-1;}movsPage=1;renderMovimientos();}
 
 function getMovsFiltrados(){
@@ -1216,51 +1008,39 @@ function getMovsFiltrados(){
 
 function renderMovimientos(){
   const movs=getMovsFiltrados();
-  document.getElementById('countMovs').textContent=`${movs.length} movimientos`;
+  document.getElementById('countMovs').textContent=movs.length+' movimientos';
   const pages=Math.max(1,Math.ceil(movs.length/PER_PAGE));
   if(movsPage>pages) movsPage=pages;
   const slice=movs.slice((movsPage-1)*PER_PAGE,movsPage*PER_PAGE);
   const tbody=document.getElementById('movsBody');
   tbody.innerHTML=slice.length?slice.map(m=>{
     const p=m.partida?state.partidas.find(x=>x.id===m.partida):null;
-    const badge=p?`<span class="partida-badge" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}44" onclick="toggleSelect(this,'${m.id}')">${p.nombre}</span>`
-      :`<span class="partida-badge" style="background:var(--surface2);color:var(--text3);border:1px solid var(--border)" onclick="toggleSelect(this,'${m.id}')">Sin clasificar</span>`;
-    return `<tr><td class="td-date">${m.fecha||''}</td><td class="td-concepto" title="${m.concepto||''}">${m.concepto||''}</td><td class="td-banco">${m.bancoNombre||m.banco||''}</td><td class="td-amount ${m.importe>=0?'pos':'neg'}">${fmt(m.importe)}</td><td id="cell-${m.id}">${badge}</td><td><button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;border-radius:6px" onclick="eliminarMov('${m.id}')">✕</button></td></tr>`;
-  }).join(''):`<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Sin movimientos</td></tr>`;
+    const badge=p?'<span class="partida-badge" style="background:'+p.color+'22;color:'+p.color+';border:1px solid '+p.color+'44" onclick="toggleSelect(this,\''+m.id+'\')">'+p.nombre+'</span>'
+      :'<span class="partida-badge" style="background:var(--surface2);color:var(--text3);border:1px solid var(--border)" onclick="toggleSelect(this,\''+m.id+'\')">Sin clasificar</span>';
+    return '<tr><td class="td-date">'+m.fecha+'</td><td class="td-concepto" title="'+m.concepto+'">'+m.concepto+'</td><td class="td-banco">'+(m.bancoNombre||m.banco||'')+'</td><td class="td-amount '+(m.importe>=0?'pos':'neg')+'">'+fmt(m.importe)+'</td><td id="cell-'+m.id+'">'+badge+'</td><td><button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;border-radius:6px" onclick="eliminarMov(\''+m.id+'\')">✕</button></td></tr>';
+  }).join(''):'<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Sin movimientos</td></tr>';
   const pag=document.getElementById('pagination');
-  pag.innerHTML=pages>1?`<button class="btn btn-secondary btn-sm" onclick="cambiarPagina(${movsPage-1})" ${movsPage<=1?'disabled':''}>←</button><span class="page-info">${movsPage} / ${pages}</span><button class="btn btn-secondary btn-sm" onclick="cambiarPagina(${movsPage+1})" ${movsPage>=pages?'disabled':''}>→</button>`:'';
+  pag.innerHTML=pages>1?'<button class="btn btn-secondary btn-sm" onclick="cambiarPagina('+(movsPage-1)+')" '+(movsPage<=1?'disabled':'')+'>←</button><span class="page-info">'+movsPage+' / '+pages+'</span><button class="btn btn-secondary btn-sm" onclick="cambiarPagina('+(movsPage+1)+')" '+(movsPage>=pages?'disabled':'')+'>→</button>':'';
 }
 
 function cambiarPagina(p){movsPage=p;renderMovimientos();}
-function toggleSelect(el,movId){const cell=document.getElementById('cell-'+movId);cell.innerHTML=`<select class="partida-select" onchange="asignarPartida('${movId}',this.value)" onblur="renderMovimientos()">${opcionesBadge(state.movimientos.find(m=>m.id===movId)?.partida||'')}</select>`;cell.querySelector('select').focus();}
-function opcionesBadge(cur){return`<option value="">Sin clasificar</option>`+state.partidas.map(p=>`<option value="${p.id}"${cur===p.id?' selected':''}>${p.nombre}</option>`).join('');}
+function toggleSelect(el,movId){const cell=document.getElementById('cell-'+movId);cell.innerHTML='<select class="partida-select" onchange="asignarPartida(\''+movId+'\',this.value)" onblur="renderMovimientos()">'+opcionesBadge(state.movimientos.find(m=>m.id===movId)?.partida||'')+'</select>';cell.querySelector('select').focus();}
+function opcionesBadge(cur){return'<option value="">Sin clasificar</option>'+state.partidas.map(p=>'<option value="'+p.id+'"'+(cur===p.id?' selected':'')+'>'+p.nombre+'</option>').join('');}
 function asignarPartida(movId,pid){const m=state.movimientos.find(x=>x.id===movId);if(m)m.partida=pid||'';renderMovimientos();renderDashboard();}
 function eliminarMov(movId){if(!confirm('¿Eliminar?'))return;state.movimientos=state.movimientos.filter(m=>m.id!==movId);renderMovimientos();renderDashboard();}
 function limpiarFiltros(){['filtroTexto','filtroMes'].forEach(id=>document.getElementById(id).value='');['filtroPartida','filtroBanco','filtroTipo'].forEach(id=>document.getElementById(id).value='');movsPage=1;renderMovimientos();}
 
 function renderFiltros(){
   const selP=document.getElementById('filtroPartida');if(!selP)return;
-  selP.innerHTML='<option value="">Todas las partidas</option>'+state.partidas.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+  selP.innerHTML='<option value="">Todas las partidas</option>'+state.partidas.map(p=>'<option value="'+p.id+'">'+p.nombre+'</option>').join('');
   const bancos=[...new Set(state.movimientos.map(m=>m.bancoNombre||m.banco).filter(Boolean))];
-  document.getElementById('filtroBanco').innerHTML='<option value="">Todos los bancos</option>'+bancos.map(b=>`<option value="${b}">${b}</option>`).join('');
+  document.getElementById('filtroBanco').innerHTML='<option value="">Todos los bancos</option>'+bancos.map(b=>'<option value="'+b+'">'+b+'</option>').join('');
 }
 
 function renderPartidas(){
-  document.getElementById('partidasList').innerHTML=state.partidas.map((p,i)=>`
-    <div class="partida-row">
-      <input type="color" value="${p.color}" onchange="state.partidas[${i}].color=this.value;this.nextElementSibling.style.background=this.value">
-      <div class="partida-color-dot" style="background:${p.color}"></div>
-      <input class="partida-name-input" value="${p.nombre}" onchange="state.partidas[${i}].nombre=this.value">
-      <select class="tipo-select" onchange="state.partidas[${i}].tipo=this.value">
-        <option value="gasto"${p.tipo==='gasto'?' selected':''}>Gasto</option>
-        <option value="ingreso"${p.tipo==='ingreso'?' selected':''}>Ingreso</option>
-        <option value="ambos"${p.tipo==='ambos'?' selected':''}>Ambos</option>
-      </select>
-      <button class="btn btn-danger btn-sm" onclick="eliminarPartida('${p.id}')">✕</button>
-    </div>`).join('');
-  document.getElementById('colorPalette').innerHTML=COLORES.map(c=>`<div style="width:24px;height:24px;border-radius:6px;background:${c};cursor:pointer" title="${c}" onclick="navigator.clipboard?.writeText('${c}');toast('Color copiado','success')"></div>`).join('');
+  document.getElementById('partidasList').innerHTML=state.partidas.map((p,i)=>'<div class="partida-row"><input type="color" value="'+p.color+'" onchange="state.partidas['+i+'].color=this.value;this.nextElementSibling.style.background=this.value"><div class="partida-color-dot" style="background:'+p.color+'"></div><input class="partida-name-input" value="'+p.nombre+'" onchange="state.partidas['+i+'].nombre=this.value"><select class="tipo-select" onchange="state.partidas['+i+'].tipo=this.value"><option value="gasto"'+(p.tipo==='gasto'?' selected':'')+'>Gasto</option><option value="ingreso"'+(p.tipo==='ingreso'?' selected':'')+'>Ingreso</option><option value="ambos"'+(p.tipo==='ambos'?' selected':'')+'>Ambos</option></select><button class="btn btn-danger btn-sm" onclick="eliminarPartida(\''+p.id+'\')">✕</button></div>').join('');
+  document.getElementById('colorPalette').innerHTML=COLORES.map(c=>'<div style="width:24px;height:24px;border-radius:6px;background:'+c+';cursor:pointer" onclick="navigator.clipboard?.writeText(\''+c+'\');toast(\'Color copiado\',\'success\')"></div>').join('');
 }
-
 function nuevaPartida(){state.partidas.push({id:uid(),nombre:'Nueva partida',color:COLORES[state.partidas.length%COLORES.length],tipo:'gasto'});renderPartidas();}
 function eliminarPartida(id){if(!confirm('¿Eliminar?'))return;state.partidas=state.partidas.filter(p=>p.id!==id);state.movimientos.forEach(m=>{if(m.partida===id)m.partida='';});renderPartidas();renderDashboard();}
 function guardarPartidas(){document.querySelectorAll('.partida-name-input').forEach((inp,i)=>{if(state.partidas[i])state.partidas[i].nombre=inp.value;});syncDrive();toast('Partidas guardadas','success');}
@@ -1268,25 +1048,17 @@ function guardarPartidas(){document.querySelectorAll('.partida-name-input').forE
 function renderReglas(){
   const list=document.getElementById('reglasList');
   if(!state.reglas.length){list.innerHTML='<div class="empty-state"><div class="empty-icon">⚙️</div><p>Sin reglas</p></div>';return;}
-  list.innerHTML=state.reglas.map((r,i)=>{const p=state.partidas.find(x=>x.id===r.partida);return`
-    <div class="regla-row"><span class="regla-kw">${r.kw}</span><span class="regla-arrow">→</span><span style="flex:1;font-size:12px;color:${p?.color||'var(--text2)'}">${p?.nombre||r.partida||'?'}</span><button class="btn btn-danger btn-sm" onclick="eliminarRegla(${i})">✕</button></div>`;}).join('');
+  list.innerHTML=state.reglas.map((r,i)=>{const p=state.partidas.find(x=>x.id===r.partida);return'<div class="regla-row"><span class="regla-kw">'+r.kw+'</span><span style="color:var(--text3);font-size:12px">→</span><span style="flex:1;font-size:12px;color:'+(p?.color||'var(--text2)')+'">'+( p?.nombre||r.partida||'?')+'</span><button class="btn btn-danger btn-sm" onclick="eliminarRegla('+i+')">✕</button></div>';}).join('');
 }
-function nuevaRegla(){document.getElementById('reglaPartida').innerHTML=state.partidas.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');document.getElementById('reglaKw').value='';document.getElementById('modalRegla').style.display='flex';}
+function nuevaRegla(){document.getElementById('reglaPartida').innerHTML=state.partidas.map(p=>'<option value="'+p.id+'">'+p.nombre+'</option>').join('');document.getElementById('reglaKw').value='';document.getElementById('modalRegla').style.display='flex';}
 function guardarRegla(){const kw=document.getElementById('reglaKw').value.trim(),partida=document.getElementById('reglaPartida').value;if(!kw){toast('Introduce una palabra clave','error');return;}state.reglas.push({kw,partida});cerrarModal('modalRegla');renderReglas();syncDrive();toast('Regla añadida','success');}
 function eliminarRegla(i){state.reglas.splice(i,1);renderReglas();syncDrive();}
 function aplicarReglas(concepto){const cu=(concepto||'').toUpperCase();for(const r of state.reglas){if(cu.includes(r.kw.toUpperCase()))return r.partida;}return'';}
-function reaplicarReglas(){let n=0;state.movimientos.forEach(m=>{if(!m.partida){const p=aplicarReglas(m.concepto);if(p){m.partida=p;n++;}}});renderAll();syncDrive();toast(`${n} movimientos clasificados`,'success');}
-function reaplicarReglasAll(){if(!confirm('¿Aplicar a todos?'))return;let n=0;state.movimientos.forEach(m=>{const p=aplicarReglas(m.concepto);if(p){m.partida=p;n++;}});renderAll();syncDrive();toast(`${n} reclasificados`,'success');}
+function reaplicarReglas(){let n=0;state.movimientos.forEach(m=>{if(!m.partida){const p=aplicarReglas(m.concepto);if(p){m.partida=p;n++;}}});renderAll();syncDrive();toast(n+' movimientos clasificados','success');}
+function reaplicarReglasAll(){if(!confirm('¿Aplicar a todos?'))return;let n=0;state.movimientos.forEach(m=>{const p=aplicarReglas(m.concepto);if(p){m.partida=p;n++;}});renderAll();syncDrive();toast(n+' reclasificados','success');}
 
 function renderBancos(){
-  document.getElementById('bancosList').innerHTML=state.bancos.map((b,i)=>`
-    <div class="banco-config-card">
-      <div class="banco-header"><span class="banco-name">${b.nombre}</span><button class="btn btn-danger btn-sm" onclick="eliminarBanco(${i})">Eliminar</button></div>
-      <div class="field-row">
-        <div class="field-group"><label class="field-label">Nombre</label><input class="field-input" value="${b.nombre}" onchange="state.bancos[${i}].nombre=this.value"></div>
-        <div class="field-group"><label class="field-label">Formato preferido</label><select class="field-input" onchange="state.bancos[${i}].formato=this.value"><option value="pdf"${b.formato==='pdf'?' selected':''}>PDF</option><option value="xlsx"${b.formato==='xlsx'?' selected':''}>Excel</option><option value="csv"${b.formato==='csv'||!b.formato?' selected':''}>CSV</option></select></div>
-      </div>
-    </div>`).join('')||'<div class="empty-state"><div class="empty-icon">🏦</div><p>Sin bancos</p></div>';
+  document.getElementById('bancosList').innerHTML=state.bancos.map((b,i)=>'<div class="banco-config-card"><div class="banco-header"><span class="banco-name">'+b.nombre+'</span><button class="btn btn-danger btn-sm" onclick="eliminarBanco('+i+')">Eliminar</button></div><div class="field-row"><div class="field-group"><label class="field-label">Nombre</label><input class="field-input" value="'+b.nombre+'" onchange="state.bancos['+i+'].nombre=this.value"></div><div class="field-group"><label class="field-label">Formato preferido</label><select class="field-input" onchange="state.bancos['+i+'].formato=this.value"><option value="pdf"'+(b.formato==='pdf'?' selected':'')+'>PDF</option><option value="xlsx"'+(b.formato==='xlsx'?' selected':'')+'>Excel</option><option value="csv"'+(b.formato==='csv'||!b.formato?' selected':'')+'>CSV</option></select></div></div></div>').join('')||'<div class="empty-state"><div class="empty-icon">🏦</div><p>Sin bancos</p></div>';
 }
 function nuevoBanco(){state.bancos.push({id:uid(),nombre:'Nuevo banco',separador:';',encoding:'utf8',formato:'csv'});renderBancos();}
 function eliminarBanco(i){state.bancos.splice(i,1);renderBancos();}
@@ -1295,14 +1067,7 @@ function guardarBancos(){syncDrive();toast('Bancos guardados','success');}
 function renderHistorial(){
   const cont=document.getElementById('historialImport');
   if(!state.historial.length){cont.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><p>Sin importaciones aún</p></div>';return;}
-  cont.innerHTML=state.historial.slice(0,20).map(h=>`
-    <div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
-      <span style="color:var(--text3);font-family:var(--font-mono);font-size:11px">${h.fecha}</span>
-      <span style="flex:1">${h.banco}</span>
-      ${h.tipo?`<span class="file-type-badge ${h.tipo.toLowerCase()}">${h.tipo}</span>`:''}
-      <span style="color:var(--income)">+${h.nuevos}</span>
-      ${h.duplicados?`<span style="color:var(--text3)">${h.duplicados} dup.</span>`:''}
-    </div>`).join('');
+  cont.innerHTML=state.historial.slice(0,20).map(h=>'<div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--text3);font-family:var(--font-mono);font-size:11px">'+h.fecha+'</span><span style="flex:1">'+h.banco+'</span>'+(h.tipo?'<span class="file-type-badge '+h.tipo.toLowerCase()+'">'+h.tipo+'</span>':'')+'<span style="color:var(--income)">+'+h.nuevos+'</span>'+(h.duplicados?'<span style="color:var(--text3)">'+h.duplicados+' dup.</span>':'')+'</div>').join('');
 }
 
 function showTab(tab){
@@ -1315,7 +1080,6 @@ function showTab(tab){
   if(tab==='dashboard') renderDashboard();
 }
 
-// ── HELPERS ──
 function fmt(n){return(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
 function uid(){return Math.random().toString(36).slice(2,10);}
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3000);}
