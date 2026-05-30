@@ -195,6 +195,17 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 .pdf-progress{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px;}
 .pdf-progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;}
 .pdf-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s;}
+
+/* ── BANCO PICKER ── */
+.banco-picker-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.banco-picker-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.15s;font-family:var(--font-body);font-size:13px;color:var(--text);text-align:left;}
+.banco-picker-btn:hover{border-color:var(--accent);color:var(--accent);}
+.banco-picker-btn .banco-fmt{font-size:10px;font-family:var(--font-mono);padding:2px 6px;border-radius:4px;margin-left:auto;}
+.banco-picker-btn .banco-fmt.pdf{background:rgba(255,77,109,0.15);color:var(--accent2);}
+.banco-picker-btn .banco-fmt.xlsx{background:rgba(0,229,160,0.15);color:var(--accent);}
+.banco-picker-btn .banco-fmt.csv{background:rgba(77,159,255,0.15);color:var(--accent3);}
+.banco-nuevo-form{display:none;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-top:4px;}
+.banco-nuevo-form.show{display:block;}
 </style>
 </head>
 <body>
@@ -203,7 +214,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-sub">ACCESO SEGURO · v3.0</div>
+    <div class="pin-sub">ACCESO SEGURO · v4.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -243,7 +254,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
         <div class="drive-dot" id="driveDot"></div>
         <span id="driveLabel">Drive</span>
       </div>
-      <span class="version-badge">v3.0</span>
+      <span class="version-badge">v4.0</span>
       <button class="btn btn-secondary btn-sm" onclick="syncDrive()">💾 Guardar</button>
       <button class="btn btn-secondary btn-sm" onclick="signOut()" title="Cerrar sesión Google">⏏</button>
     </div>
@@ -404,6 +415,34 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
       <div class="section-header"><span class="section-title">Bancos configurados</span><button class="btn btn-primary btn-sm" onclick="nuevoBanco()">+ Nuevo banco</button></div>
       <div id="bancosList"></div>
       <button class="btn btn-secondary" onclick="guardarBancos()" style="margin-top:12px">💾 Guardar bancos</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BANCO PICKER -->
+<div class="modal-overlay" id="modalBanco" style="display:none">
+  <div class="modal">
+    <div class="modal-title">¿De qué banco es este extracto?</div>
+    <div class="banco-picker-grid" id="bancoPicker"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+      <button class="btn btn-secondary" style="width:100%" onclick="toggleNuevoBanco()">+ Crear nuevo banco</button>
+      <div class="banco-nuevo-form" id="nuevoBancoForm">
+        <div class="field-row" style="margin-top:10px">
+          <div class="field-group">
+            <label class="field-label">Nombre del banco</label>
+            <input type="text" class="field-input" id="nuevoBancoNombre" placeholder="ej: Unicaja" style="width:100%">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Formato habitual</label>
+            <select class="field-input" id="nuevoBancoFormato">
+              <option value="csv">CSV</option>
+              <option value="xlsx">Excel</option>
+              <option value="pdf">PDF</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="crearYSeleccionarBanco()">Crear y continuar →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -887,7 +926,58 @@ function parseBankinterPDF(lines, filename) {
   showPreview(filename);
 }
 
+let pendingFilename = '';
+
 function showPreview(filename) {
+  pendingFilename = filename;
+  // Always ask which bank first
+  openBancoPicker(filename);
+}
+
+function openBancoPicker(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  // Build picker list — highlight banks matching file extension
+  const grid = document.getElementById('bancoPicker');
+  grid.innerHTML = state.bancos.map(b => {
+    const match = b.formato === ext;
+    return `<button class="banco-picker-btn" style="${match?'border-color:var(--accent);':''}" onclick="seleccionarBanco('${b.id}')">
+      <span>${b.nombre}</span>
+      <span class="banco-fmt ${b.formato||'csv'}">${(b.formato||'csv').toUpperCase()}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('nuevoBancoForm').classList.remove('show');
+  document.getElementById('nuevoBancoNombre').value = '';
+  // Auto-detect formato for new banco
+  document.getElementById('nuevoBancoFormato').value = ext==='pdf'?'pdf':ext==='xlsx'||ext==='xls'?'xlsx':'csv';
+  document.getElementById('modalBanco').style.display = 'flex';
+}
+
+function seleccionarBanco(bancoId) {
+  cerrarModal('modalBanco');
+  buildPreview(pendingFilename, bancoId);
+}
+
+function toggleNuevoBanco() {
+  document.getElementById('nuevoBancoForm').classList.toggle('show');
+  if (document.getElementById('nuevoBancoForm').classList.contains('show')) {
+    setTimeout(() => document.getElementById('nuevoBancoNombre').focus(), 50);
+  }
+}
+
+function crearYSeleccionarBanco() {
+  const nombre = document.getElementById('nuevoBancoNombre').value.trim();
+  if (!nombre) { toast('Escribe el nombre del banco','error'); return; }
+  const formato = document.getElementById('nuevoBancoFormato').value;
+  const newBanco = { id: uid(), nombre, separador:';', encoding:'utf8', formato };
+  state.bancos.push(newBanco);
+  cerrarModal('modalBanco');
+  renderBancos();
+  syncDrive();
+  buildPreview(pendingFilename, newBanco.id);
+  toast(`Banco "${nombre}" creado`,'success');
+}
+
+function buildPreview(filename, bancoId) {
   document.getElementById('previewCard').style.display='block';
   const ext = filename.split('.').pop().toLowerCase();
   document.getElementById('previewFileName').innerHTML = `${filename} <span class="file-type-badge ${ext}">${ext.toUpperCase()}</span>`;
@@ -905,7 +995,8 @@ function showPreview(filename) {
   ['colCargo','colAbono'].forEach(id=>document.getElementById(id).innerHTML=optsNone);
   autoDetect(parsedHeaders);
 
-  document.getElementById('colBanco').innerHTML = state.bancos.map(b=>`<option value="${b.id}">${b.nombre}</option>`).join('');
+  // Set selected banco
+  document.getElementById('colBanco').innerHTML = state.bancos.map(b=>`<option value="${b.id}"${b.id===bancoId?' selected':''}>${b.nombre}</option>`).join('');
 }
 
 function autoDetect(headers) {
