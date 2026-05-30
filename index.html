@@ -215,14 +215,16 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-ver">ACCESO SEGURO · v5.0</div>
+    <div class="pin-ver">ACCESO SEGURO · v9.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
-    <input type="password" class="pin-input" id="pinInput" maxlength="6" placeholder="······"
-      oninput="onPinInput()" onkeydown="if(event.key==='Enter')checkPin()" autocomplete="off">
-    <button class="pin-btn" onclick="checkPin()">Entrar →</button>
+    <input type="password" class="pin-input" id="pinInput" maxlength="6" placeholder="______"
+      inputmode="numeric" autocomplete="off"
+      oninput="pinInput_handler()"
+      onkeydown="pinKey_handler(event)">
+    <button class="pin-btn" onclick="checkPin()">Entrar &rarr;</button>
     <div class="pin-err" id="pinErr"></div>
   </div>
 </div>
@@ -252,7 +254,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
     <div class="topbar-actions">
       <span class="drive-user" id="topUser"></span>
       <div class="drive-status"><div class="drive-dot" id="driveDot"></div><span id="driveLabel">Drive</span></div>
-      <span class="version-badge">v5.0</span>
+      <span class="version-badge">v9.0</span>
       <button class="btn btn-secondary btn-sm" onclick="syncDrive()">💾 Guardar</button>
       <button class="btn btn-secondary btn-sm" onclick="signOut()" title="Cerrar sesión">⏏</button>
     </div>
@@ -444,7 +446,9 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 
 <div id="toast"></div>
 
+
 <script>
+
 // ═══ CONFIG ═══
 const PIN_CODE = '520423';
 const CLIENT_ID = '906920921997-mj5u3pf864il6789ul7vd4cp7utjrfrt.apps.googleusercontent.com';
@@ -477,35 +481,33 @@ let currentBancoId = '';
 let colConfig = [];
 
 // ═══ PIN ═══
-function onPinInput() {
-  const v = document.getElementById('pinInput').value;
-  document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<v.length));
-  document.getElementById('pinErr').textContent='';
-  document.getElementById('pinInput').classList.remove('shake');
-  if(v.length===6) setTimeout(()=>checkPin(),200);
+function pinInput_handler() {
+  var v = document.getElementById('pinInput').value;
+  var dots = document.querySelectorAll('.pin-dot');
+  for(var i=0;i<dots.length;i++) dots[i].classList.toggle('filled',i<v.length);
+  if(v.length===6) checkPin();
+}
+function pinKey_handler(e) {
+  if(e.key==='Enter') checkPin();
 }
 function checkPin() {
-  const inp=document.getElementById('pinInput');
-  const v=inp.value;
-  if(!v){inp.focus();return;}
-  const err=document.getElementById('pinErr');
-  if(v===PIN_CODE){
-    err.style.color='var(--accent)';
-    err.textContent='\u2713 Correcto\u2026';
+  var v = document.getElementById('pinInput').value.trim();
+  var err = document.getElementById('pinErr');
+  if(v === PIN_CODE) {
+    err.style.color='#00e5a0';
+    err.textContent='Correcto...';
     sessionStorage.setItem('pin_ok','1');
-    setTimeout(()=>{
-      document.getElementById('pinScreen').style.display='none';
-      const st=sessionStorage.getItem('g_token');
-      if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
-      else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
-    },400);
+    var st=sessionStorage.getItem('g_token');
+    document.getElementById('pinScreen').style.display='none';
+    if(st){gToken=st;showAppDirectly(sessionStorage.getItem('g_name')||'',sessionStorage.getItem('g_email')||'');}
+    else{document.getElementById('authScreen').style.display='flex';initGoogleAuth();}
   } else {
-    inp.classList.add('shake');
-    err.style.color='var(--accent2)';
-    err.textContent='Código incorrecto';
-    inp.value='';
-    document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('filled'));
-    setTimeout(()=>{inp.classList.remove('shake');inp.focus();},400);
+    err.style.color='#ff4d6d';
+    err.textContent = v.length===0 ? 'Introduce el código' : 'Código incorrecto (' + v.length + ' dígitos)';
+    document.getElementById('pinInput').value='';
+    var dots=document.querySelectorAll('.pin-dot');
+    for(var i=0;i<dots.length;i++) dots[i].classList.remove('filled');
+    document.getElementById('pinInput').focus();
   }
 }
 window.addEventListener('load',()=>{
@@ -730,7 +732,7 @@ function openBancoPicker(filename){
   const ext=filename.split('.').pop().toLowerCase();
   const grid=document.getElementById('bancoPicker');
   grid.innerHTML=state.bancos.map(b=>{
-    const match=b.formato===ext|||(ext==='xls'&&b.formato==='xlsx');
+    const match=b.formato===ext||(ext==='xls'&&b.formato==='xlsx');
     return '<button class="banco-picker-btn" style="'+(match?'border-color:var(--accent);':'')+'" onclick="seleccionarBanco(\''+b.id+'\')">'
       +'<span>'+b.nombre+'</span>'
       +'<span class="bfmt '+(b.formato||'csv')+'">'+(b.formato||'csv').toUpperCase()+'</span>'
@@ -1098,6 +1100,7 @@ function setDriveStatus(s){
   else if(s==='loading'){dot.className='drive-dot saving';lbl.textContent='Cargando…';}
   else{dot.className='drive-dot';lbl.textContent='Drive (error)';}
 }
+
 </script>
 </body>
 </html>
