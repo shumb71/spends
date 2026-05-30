@@ -732,7 +732,20 @@ function handleExcel(file) {
     for (var i = 0; i < Math.min(10, data.length); i++) {
       if (data[i].filter(function(c) { return String(c).trim(); }).length >= 3) { hi = i; break; }
     }
-    parsedHeaders = data[hi].map(function(h) { return String(h).trim(); }).filter(function(h) { return h; });
+    // Find header row: the one with the MOST non-empty cells in first 10 rows
+    var bestRow = 0, bestCount = 0;
+    for (var j = 0; j < Math.min(10, data.length); j++) {
+      var cnt = data[j].filter(function(c) { return String(c).trim(); }).length;
+      if (cnt > bestCount) { bestCount = cnt; bestRow = j; }
+    }
+    hi = bestRow;
+    // Keep ALL headers including empty ones (use index as fallback name)
+    var rawHeaders = data[hi];
+    parsedHeaders = rawHeaders.map(function(h, idx) {
+      var s = String(h).trim();
+      return s || ('Col_' + (idx+1));
+    });
+    var numCols = parsedHeaders.length;
     parsedRows = data.slice(hi + 1).filter(function(r) { return r.some(function(c) { return String(c).trim(); }); }).map(function(r) {
       var obj = {};
       parsedHeaders.forEach(function(h, i) { obj[h] = r[i] !== undefined ? String(r[i]).trim() : ''; });
