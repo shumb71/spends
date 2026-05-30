@@ -191,7 +191,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-ver">ACCESO SEGURO &middot; v11.0</div>
+    <div class="pin-ver">ACCESO SEGURO &middot; v12.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -225,7 +225,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
     <div class="topbar-actions">
       <span class="drive-user" id="topUser"></span>
       <div class="drive-status"><div class="drive-dot" id="driveDot"></div><span id="driveLabel">Drive</span></div>
-      <span class="version-badge">v11.0</span>
+      <span class="version-badge">v12.0</span>
       <button class="btn btn-secondary btn-sm" id="saveBtn">&#128190; Guardar</button>
       <button class="btn btn-secondary btn-sm" id="signOutBtn" title="Cerrar sesion">&#x23CF;</button>
     </div>
@@ -782,33 +782,47 @@ function splitLine(line, sep) {
 
 function handleExcel(file) {
   file.arrayBuffer().then(function(buf) {
+    // Read twice:
+    // 1) raw:false + cellDates:true  => dates as YYYY-MM-DD strings, text as strings
+    // 2) raw:true                    => numbers as actual JS numbers (avoids decimal separator issues)
     var wb = XLSX.read(buf, {type:'array', cellDates:true, cellNF:false, cellText:false});
     var ws = wb.Sheets[wb.SheetNames[0]];
-    var data = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:false, dateNF:'YYYY-MM-DD'});
-    if (!data.length) { toast('Excel vacio', 'error'); return; }
-    var hi = 0;
-    for (var i = 0; i < Math.min(10, data.length); i++) {
-      if (data[i].filter(function(c) { return String(c).trim(); }).length >= 3) { hi = i; break; }
-    }
-    // Find header row: the one with the MOST non-empty cells in first 10 rows
+    var dataText = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:false, dateNF:'YYYY-MM-DD'});
+    var dataRaw  = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:true});
+    if (!dataText.length) { toast('Excel vacio', 'error'); return; }
+
+    // Find header row: row with MOST non-empty cells in first 10 rows
     var bestRow = 0, bestCount = 0;
-    for (var j = 0; j < Math.min(10, data.length); j++) {
-      var cnt = data[j].filter(function(c) { return String(c).trim(); }).length;
+    for (var j = 0; j < Math.min(10, dataText.length); j++) {
+      var cnt = dataText[j].filter(function(x) { return String(x).trim(); }).length;
       if (cnt > bestCount) { bestCount = cnt; bestRow = j; }
     }
-    hi = bestRow;
-    // Keep ALL headers including empty ones (use index as fallback name)
-    var rawHeaders = data[hi];
-    parsedHeaders = rawHeaders.map(function(h, idx) {
-      var s = String(h).trim();
-      return s || ('Col_' + (idx+1));
+    var hi = bestRow;
+
+    // Build headers — keep all, fallback name for empty
+    parsedHeaders = dataText[hi].map(function(h, idx) {
+      return String(h).trim() || ('Col_' + (idx+1));
     });
-    var numCols = parsedHeaders.length;
-    parsedRows = data.slice(hi + 1).filter(function(r) { return r.some(function(c) { return String(c).trim(); }); }).map(function(r) {
+
+    // Build rows: use raw number for numeric cells, text otherwise
+    parsedRows = dataText.slice(hi + 1).filter(function(r) {
+      return r.some(function(x) { return String(x).trim(); });
+    }).map(function(r, rowIdx) {
+      var rawRow = (dataRaw[hi + 1 + rowIdx]) || [];
       var obj = {};
-      parsedHeaders.forEach(function(h, i) { obj[h] = r[i] !== undefined ? String(r[i]).trim() : ''; });
+      parsedHeaders.forEach(function(h, ci) {
+        var rawVal = rawRow[ci];
+        var textVal = r[ci] !== undefined ? String(r[ci]).trim() : '';
+        // If raw value is a real JS number, use it directly (avoids decimal/format issues)
+        if (typeof rawVal === 'number' && !isNaN(rawVal)) {
+          obj[h] = rawVal; // store as number — parseImp will handle it
+        } else {
+          obj[h] = textVal;
+        }
+      });
       return obj;
     });
+
     openBancoPicker(file.name);
   });
 }
@@ -1068,8 +1082,11 @@ function cancelarPreview() {
 }
 
 function parseImp(str, decimal) {
-  if (!str) return 0;
+  if (str === '' || str === null || str === undefined) return 0;
+  // If already a number (from Excel raw read), return directly
+  if (typeof str === 'number') return str;
   var s = String(str).trim().replace(/\s/g,'').replace(/[€$]/g,'').replace(/-\s*$/,'');
+  if (!s) return 0;
   if (decimal === 'coma') { s = s.replace(/\./g,'').replace(',','.'); } else { s = s.replace(/,/g,''); }
   return parseFloat(s) || 0;
 }
