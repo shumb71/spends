@@ -191,7 +191,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-ver">ACCESO SEGURO &middot; v10.0</div>
+    <div class="pin-ver">ACCESO SEGURO &middot; v11.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -225,7 +225,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
     <div class="topbar-actions">
       <span class="drive-user" id="topUser"></span>
       <div class="drive-status"><div class="drive-dot" id="driveDot"></div><span id="driveLabel">Drive</span></div>
-      <span class="version-badge">v10.0</span>
+      <span class="version-badge">v11.0</span>
       <button class="btn btn-secondary btn-sm" id="saveBtn">&#128190; Guardar</button>
       <button class="btn btn-secondary btn-sm" id="signOutBtn" title="Cerrar sesion">&#x23CF;</button>
     </div>
@@ -237,6 +237,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
     <div class="tab" data-tab="partidas">&#127991;&#65039; Partidas</div>
     <div class="tab" data-tab="reglas">&#9881;&#65039; Reglas</div>
     <div class="tab" data-tab="bancos">&#127968; Bancos</div>
+    <div class="tab" data-tab="consolidar">&#128228; Consolidar</div>
   </div>
   <div class="main">
 
@@ -368,6 +369,58 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
       <button class="btn btn-secondary" id="guardarBancosBtn" style="margin-top:12px">&#128190; Guardar</button>
     </div>
 
+
+    <div class="panel" id="panel-consolidar">
+      <div class="two-col">
+        <div>
+          <div class="section-header">
+            <span class="section-title">Reglas de consolidacion</span>
+            <button class="btn btn-primary btn-sm" id="nuevaConsBtn">+ Nueva regla</button>
+          </div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px">
+            Agrupa movimientos del mismo mes que contengan el patron en un unico movimiento mensual.
+          </p>
+          <div id="consListEl"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Aplicar consolidaciones</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
+            Agrupa los movimientos que coincidan con cada regla, mes a mes, en un movimiento unico.
+          </p>
+          <button class="btn btn-primary" id="aplicarConsBtn">&#128228; Aplicar consolidaciones</button>
+          <hr class="separator">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:6px">
+            Los movimientos originales se sustituyen por el consolidado mensual.<br>
+            <span style="font-size:11px;color:var(--text3)">Esta accion no se puede deshacer directamente — reimporta el extracto si necesitas los originales.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONSOLIDACION -->
+<div class="modal-overlay" id="modalCons" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Nueva regla de consolidacion</div>
+    <div class="field-group" style="margin-bottom:14px">
+      <label class="field-label">Patron (contiene este texto)</label>
+      <input type="text" class="field-input" id="consPatron" placeholder="ej: Revolut, Amazon, Netflix..." style="width:100%">
+    </div>
+    <div class="field-group" style="margin-bottom:14px">
+      <label class="field-label">Nombre resultado (se añade el mes automaticamente)</label>
+      <input type="text" class="field-input" id="consNombre" placeholder="ej: Enviado a Revolut, Compras Amazon..." style="width:100%">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Partida a asignar (opcional)</label>
+      <select class="field-input" id="consPartida" style="width:100%">
+        <option value="">Sin clasificar</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelConsBtn">Cancelar</button>
+      <button class="btn btn-primary" id="guardarConsBtn">Guardar regla</button>
+    </div>
   </div>
 </div>
 
@@ -435,7 +488,7 @@ var ROLES_BASE = [
 ];
 
 // ═══ STATE ═══
-var state = {movimientos:[], partidas:[], reglas:[], bancos:[], historial:[], rolesExtra:[]};
+var state = {movimientos:[], partidas:[], reglas:[], bancos:[], historial:[], rolesExtra:[], consolidaciones:[]};
 var gToken = null;
 var driveIds = {reglas:null, movimientos:null};
 var tokenClient = null;
@@ -609,6 +662,7 @@ function loadFromDrive() {
       state.bancos = d.bancos || [];
       state.historial = d.historial || [];
       state.rolesExtra = d.rolesExtra || [];
+      state.consolidaciones = d.consolidaciones || [];
     });
     if (driveIds.movimientos) p = p.then(function() { return driveRead(driveIds.movimientos); }).then(function(t) {
       var d = JSON.parse(t);
@@ -626,7 +680,7 @@ function loadFromDrive() {
 
 function syncDrive() {
   setDriveStatus('saving');
-  var reg = JSON.stringify({partidas:state.partidas, reglas:state.reglas, bancos:state.bancos, historial:state.historial, rolesExtra:state.rolesExtra});
+  var reg = JSON.stringify({partidas:state.partidas, reglas:state.reglas, bancos:state.bancos, historial:state.historial, rolesExtra:state.rolesExtra, consolidaciones:state.consolidaciones});
   var mov = JSON.stringify({movimientos:state.movimientos});
   var p1 = driveIds.reglas ? driveUpdate(driveIds.reglas, reg) : driveCreate(FILE_REGLAS, reg).then(function(id) { driveIds.reglas = id; });
   var p2 = driveIds.movimientos ? driveUpdate(driveIds.movimientos, mov) : driveCreate(FILE_MOVS, mov).then(function(id) { driveIds.movimientos = id; });
@@ -667,6 +721,10 @@ function loadDefaults() {
     {id:'santander',nombre:'Santander',formato:'csv'}
   ];
   state.rolesExtra = [];
+  state.consolidaciones = [
+    {id:'revolut', patron:'Revolut', nombre:'Enviado a Revolut', partida:'transferencia'},
+    {id:'amazon', patron:'Amazon', nombre:'Compras Amazon', partida:'otros_gastos'}
+  ];
 }
 
 // ═══ FILE HANDLING ═══
@@ -1030,7 +1088,7 @@ function normFecha(str) {
 }
 
 // ═══ RENDER ALL ═══
-function renderAll() { renderDashboard(); renderMovimientos(); renderPartidas(); renderReglas(); renderBancos(); renderFiltros(); renderHistorial(); renderPeriodos(); }
+function renderAll() { renderDashboard(); renderMovimientos(); renderPartidas(); renderReglas(); renderBancos(); renderFiltros(); renderHistorial(); renderPeriodos(); renderConsolidaciones(); }
 
 function renderPeriodos() {
   var meses = [];
@@ -1354,6 +1412,118 @@ function renderHistorial() {
   }).join('');
 }
 
+// ═══ CONSOLIDACIONES ═══
+function renderConsolidaciones() {
+  var list = document.getElementById('consListEl');
+  if (!list) return;
+  if (!state.consolidaciones.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128228;</div><p>Sin reglas definidas</p></div>';
+    return;
+  }
+  list.innerHTML = state.consolidaciones.map(function(r, i) {
+    var p = state.partidas.find(function(x) { return x.id === r.partida; });
+    return '<div class="regla-row">'
+      + '<span class="regla-kw">' + r.patron + '</span>'
+      + '<span style="color:var(--text3)">&rarr;</span>'
+      + '<span style="flex:1;font-size:12px;color:var(--text)">' + r.nombre + ' [mes]</span>'
+      + (p ? '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:' + p.color + '22;color:' + p.color + '">' + p.nombre + '</span>' : '')
+      + '<button class="btn btn-danger btn-sm" data-ci="' + i + '" data-action="del-cons">x</button>'
+      + '</div>';
+  }).join('');
+  list.querySelectorAll('[data-action="del-cons"]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      state.consolidaciones.splice(parseInt(el.getAttribute('data-ci')), 1);
+      renderConsolidaciones(); syncDrive();
+    });
+  });
+}
+
+function nuevaConsolidacion() {
+  // Populate partida selector
+  document.getElementById('consPartida').innerHTML = '<option value="">Sin clasificar</option>'
+    + state.partidas.map(function(p) { return '<option value="' + p.id + '">' + p.nombre + '</option>'; }).join('');
+  document.getElementById('consPatron').value = '';
+  document.getElementById('consNombre').value = '';
+  document.getElementById('modalCons').style.display = 'flex';
+}
+
+function guardarConsolidacion() {
+  var patron = document.getElementById('consPatron').value.trim();
+  var nombre = document.getElementById('consNombre').value.trim();
+  var partida = document.getElementById('consPartida').value;
+  if (!patron) { toast('Introduce un patron', 'error'); return; }
+  if (!nombre) { toast('Introduce un nombre resultado', 'error'); return; }
+  state.consolidaciones.push({id: uid(), patron: patron, nombre: nombre, partida: partida});
+  cerrarModal('modalCons');
+  renderConsolidaciones();
+  syncDrive();
+  toast('Regla añadida', 'success');
+}
+
+function aplicarConsolidaciones() {
+  if (!state.consolidaciones.length) { toast('No hay reglas de consolidacion', 'error'); return; }
+  var totalFusionados = 0, totalCreados = 0;
+
+  state.consolidaciones.forEach(function(regla) {
+    var patron = regla.patron.toLowerCase();
+
+    // Find all matching movimientos
+    var matching = state.movimientos.filter(function(m) {
+      return (m.concepto || '').toLowerCase().indexOf(patron) >= 0;
+    });
+
+    if (!matching.length) return;
+
+    // Group by year-month
+    var byMes = {};
+    matching.forEach(function(m) {
+      var ym = m.fecha ? m.fecha.substring(0, 7) : 'sin-fecha';
+      if (!byMes[ym]) byMes[ym] = [];
+      byMes[ym].push(m);
+    });
+
+    // For each month group with 2+ items, consolidate
+    Object.keys(byMes).forEach(function(ym) {
+      var grupo = byMes[ym];
+      if (grupo.length < 2) return; // only consolidate if 2+ movements
+
+      var total = grupo.reduce(function(s, m) { return s + m.importe; }, 0);
+      var label = regla.nombre + ' ' + fmtMes(ym);
+      var lastFecha = grupo.map(function(m){return m.fecha||'';}).sort().pop();
+
+      // Remove originals
+      var ids = grupo.map(function(m) { return m.id; });
+      state.movimientos = state.movimientos.filter(function(m) { return ids.indexOf(m.id) === -1; });
+      totalFusionados += ids.length;
+
+      // Create consolidated
+      var banco = grupo[0].banco;
+      var bancoNombre = grupo[0].bancoNombre || banco;
+      state.movimientos.push({
+        id: uid(),
+        hash: ym + '_' + label + '_' + total,
+        fecha: lastFecha,
+        concepto: label,
+        importe: total,
+        banco: banco,
+        bancoNombre: bancoNombre,
+        partida: regla.partida || aplicarReglas(label),
+        importadoEn: new Date().toISOString(),
+        consolidado: true
+      });
+      totalCreados++;
+    });
+  });
+
+  renderAll();
+  syncDrive();
+  if (totalFusionados > 0) {
+    toast(totalFusionados + ' movimientos fusionados en ' + totalCreados + ' consolidados', 'success');
+  } else {
+    toast('No hay grupos con 2 o mas movimientos para consolidar', 'error');
+  }
+}
+
 // ═══ HELPERS ═══
 function fmt(n) { return (n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' \u20ac'; }
 function uid() { return Math.random().toString(36).slice(2,10); }
@@ -1382,6 +1552,7 @@ function setupTabs() {
       document.getElementById('panel-' + name).classList.add('active');
       if (name === 'movimientos') { renderFiltros(); renderMovimientos(); }
       if (name === 'dashboard') renderDashboard();
+      if (name === 'consolidar') renderConsolidaciones();
     });
   });
 }
@@ -1452,6 +1623,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('cancelReglaBtn').addEventListener('click', function(){cerrarModal('modalRegla');});
   document.getElementById('reaplicarBtn').addEventListener('click', reaplicarReglas);
   document.getElementById('reaplicarAllBtn').addEventListener('click', reaplicarReglasAll);
+
+  // Consolidaciones
+  document.getElementById('nuevaConsBtn').addEventListener('click', nuevaConsolidacion);
+  document.getElementById('aplicarConsBtn').addEventListener('click', aplicarConsolidaciones);
+  document.getElementById('guardarConsBtn').addEventListener('click', guardarConsolidacion);
+  document.getElementById('cancelConsBtn').addEventListener('click', function(){cerrarModal('modalCons');});
 
   // Bancos
   document.getElementById('nuevoBancoBtn2').addEventListener('click', function(){state.bancos.push({id:uid(),nombre:'Nuevo banco',formato:'csv'});renderBancos();});
