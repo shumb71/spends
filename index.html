@@ -191,7 +191,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
 <div id="pinScreen">
   <div class="pin-box">
     <div class="pin-logo">FINANZAS<span>/personal</span></div>
-    <div class="pin-ver">ACCESO SEGURO &middot; v12.0</div>
+    <div class="pin-ver">ACCESO SEGURO &middot; v13.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -225,7 +225,7 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
     <div class="topbar-actions">
       <span class="drive-user" id="topUser"></span>
       <div class="drive-status"><div class="drive-dot" id="driveDot"></div><span id="driveLabel">Drive</span></div>
-      <span class="version-badge">v12.0</span>
+      <span class="version-badge">v13.0</span>
       <button class="btn btn-secondary btn-sm" id="saveBtn">&#128190; Guardar</button>
       <button class="btn btn-secondary btn-sm" id="signOutBtn" title="Cerrar sesion">&#x23CF;</button>
     </div>
@@ -273,6 +273,34 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
         <button class="btn btn-secondary btn-sm" id="selNingunoBtn">&#9744; Ninguno</button>
         <span style="margin-left:auto;font-size:12px;color:var(--text2)" id="countMovs"></span>
       </div>
+      <!-- TOTALIZADOR -->
+      <div id="totalizadorBar" style="display:none;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--income);border-radius:var(--radius);padding:14px">
+            <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Ingresos filtrados</div>
+            <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--income)" id="totIngresos">0,00 &euro;</div>
+            <div style="font-size:11px;color:var(--text3)" id="totIngresosN">0 movimientos</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--expense);border-radius:var(--radius);padding:14px">
+            <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Gastos filtrados</div>
+            <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--expense)" id="totGastos">0,00 &euro;</div>
+            <div style="font-size:11px;color:var(--text3)" id="totGastosN">0 movimientos</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent3);border-radius:var(--radius);padding:14px">
+            <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Balance filtrado</div>
+            <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--accent3)" id="totBalance">0,00 &euro;</div>
+            <div style="font-size:11px;color:var(--text3)" id="totMovs">0 movimientos</div>
+          </div>
+        </div>
+        <div class="card" style="padding:14px">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:10px">Desglose mensual</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px" id="totMesesTable">
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- /TOTALIZADOR -->
       <div class="bulk-bar" id="bulkBar" style="display:none">
         <span id="bulkCount">0 seleccionados</span>
         <button class="btn btn-danger btn-sm" id="bulkDeleteBtn">&#128465; Borrar seleccionados</button>
@@ -1178,6 +1206,71 @@ function renderChart(id, movs) {
 }
 
 // ═══ MOVIMIENTOS ═══
+function hayFiltroActivo() {
+  return (document.getElementById('filtroTexto').value || '').trim() !== ''
+    || document.getElementById('filtroPartida').value !== ''
+    || document.getElementById('filtroBanco').value !== ''
+    || document.getElementById('filtroTipo').value !== ''
+    || document.getElementById('filtroMes').value !== '';
+}
+
+function renderTotalizador(movs) {
+  var bar = document.getElementById('totalizadorBar');
+  if (!hayFiltroActivo()) { bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+
+  var ing = movs.filter(function(m){ return m.importe > 0; });
+  var gas = movs.filter(function(m){ return m.importe < 0; });
+  var sumI = ing.reduce(function(s,m){ return s+m.importe; }, 0);
+  var sumG = Math.abs(gas.reduce(function(s,m){ return s+m.importe; }, 0));
+  var bal = sumI - sumG;
+
+  document.getElementById('totIngresos').textContent = fmt(sumI);
+  document.getElementById('totIngresosN').textContent = ing.length + ' movimientos';
+  document.getElementById('totGastos').textContent = fmt(sumG);
+  document.getElementById('totGastosN').textContent = gas.length + ' movimientos';
+  document.getElementById('totBalance').textContent = fmt(bal);
+  document.getElementById('totBalance').style.color = bal >= 0 ? 'var(--accent3)' : 'var(--accent2)';
+  document.getElementById('totMovs').textContent = movs.length + ' movimientos totales';
+
+  // Group by month
+  var byMes = {};
+  movs.forEach(function(m) {
+    var ym = m.fecha ? m.fecha.substring(0,7) : 'sin-fecha';
+    if (!byMes[ym]) byMes[ym] = [];
+    byMes[ym].push(m);
+  });
+
+  var meses = Object.keys(byMes).sort().reverse();
+  var tabla = document.getElementById('totMesesTable');
+
+  var html = '<thead><tr>'
+    + '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text2)">Mes</th>'
+    + '<th style="text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--income)">Ingresos</th>'
+    + '<th style="text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--expense)">Gastos</th>'
+    + '<th style="text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--accent3)">Balance</th>'
+    + '<th style="text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text3)">Movs</th>'
+    + '</tr></thead><tbody>';
+
+  meses.forEach(function(ym) {
+    var grupo = byMes[ym];
+    var mI = grupo.filter(function(m){return m.importe>0;}).reduce(function(s,m){return s+m.importe;},0);
+    var mG = Math.abs(grupo.filter(function(m){return m.importe<0;}).reduce(function(s,m){return s+m.importe;},0));
+    var mB = mI - mG;
+    var balColor = mB >= 0 ? 'var(--accent3)' : 'var(--accent2)';
+    html += '<tr style="border-bottom:1px solid var(--border)">'
+      + '<td style="padding:7px 10px;font-weight:600">' + fmtMes(ym) + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);color:var(--income)">' + (mI > 0 ? fmt(mI) : '&mdash;') + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);color:var(--expense)">' + (mG > 0 ? fmt(mG) : '&mdash;') + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;font-family:var(--font-mono);color:' + balColor + '">' + fmt(mB) + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;color:var(--text3)">' + grupo.length + '</td>'
+      + '</tr>';
+  });
+
+  html += '</tbody>';
+  tabla.innerHTML = html;
+}
+
 function getMovsFiltrados() {
   var movs = state.movimientos.slice();
   var txt = (document.getElementById('filtroTexto').value || '').toLowerCase();
@@ -1203,6 +1296,7 @@ function getMovsFiltrados() {
 function renderMovimientos() {
   var movs = getMovsFiltrados();
   document.getElementById('countMovs').textContent = movs.length + ' movimientos';
+  renderTotalizador(movs);
   var pages = Math.max(1, Math.ceil(movs.length / PER_PAGE));
   if (movsPage > pages) movsPage = pages;
   var slice = movs.slice((movsPage-1)*PER_PAGE, movsPage*PER_PAGE);
