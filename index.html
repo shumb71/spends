@@ -339,32 +339,8 @@ input[type=color]{width:36px;height:28px;border:1px solid var(--border);border-r
           <div class="card" id="previewCard" style="display:none">
             <div class="card-title">Vista previa — <span id="previewFileName"></span></div>
             <div id="previewContent"></div>
-            <hr class="separator">
-            <div style="font-family:var(--font-mono);font-size:11px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Asignar columnas</div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">FECHA</label><select class="field-input" id="colFecha"></select></div>
-              <div class="field-group"><label class="field-label">CONCEPTO</label><select class="field-input" id="colConcepto"></select></div>
-            </div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">IMPORTE (único)</label><select class="field-input" id="colImporte"></select></div>
-              <div class="field-group"><label class="field-label">CARGO / ABONO separados</label>
-                <div style="display:flex;gap:6px">
-                  <select class="field-input" id="colCargo" style="flex:1"><option value="">—</option></select>
-                  <select class="field-input" id="colAbono" style="flex:1"><option value="">—</option></select>
-                </div>
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">Banco</label><select class="field-input" id="colBanco"></select></div>
-              <div class="field-group"><label class="field-label">Separador decimal</label>
-                <select class="field-input" id="colDecimal">
-                  <option value="coma">Coma (1.234,56)</option>
-                  <option value="punto">Punto (1,234.56)</option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-actions" style="justify-content:flex-start">
-              <button class="btn btn-primary" onclick="importarDatos()">✔ Importar</button>
+            <div class="modal-actions" style="justify-content:flex-start;margin-top:16px">
+              <button class="btn btn-primary" onclick="importarDatos()">✔ Importar movimientos</button>
               <button class="btn btn-secondary" onclick="cancelarPreview()">Cancelar</button>
             </div>
           </div>
@@ -814,15 +790,15 @@ function splitLine(line,sep){
 
 async function handleExcel(file) {
   const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf,{type:'array'});
+  const wb = XLSX.read(buf, {type:"array", cellDates:true, cellNF:false, cellText:false});
   const ws = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-  if(!data.length){toast('Excel vacío','error');return;}
+  const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:"", raw:false, dateNF:"YYYY-MM-DD"});
+  if(!data.length){toast("Excel vacío","error");return;}
   let hi=0;
-  for(let i=0;i<Math.min(10,data.length);i++){if(data[i].filter(c=>c).length>=3){hi=i;break;}}
-  parsedHeaders = data[hi].map(h=>String(h).trim());
-  parsedRows = data.slice(hi+1).filter(r=>r.some(c=>c)).map(r=>{
-    const obj={};parsedHeaders.forEach((h,i)=>obj[h]=r[i]!==undefined?String(r[i]).trim():'');return obj;
+  for(let i=0;i<Math.min(10,data.length);i++){if(data[i].filter(c=>String(c).trim()).length>=3){hi=i;break;}}
+  parsedHeaders = data[hi].map(h=>String(h).trim()).filter(h=>h);
+  parsedRows = data.slice(hi+1).filter(r=>r.some(c=>String(c).trim())).map(r=>{
+    const obj={};parsedHeaders.forEach((h,i)=>{obj[h]=r[i]!==undefined?String(r[i]).trim():"";});return obj;
   });
   showPreview(file.name);
 }
@@ -977,75 +953,160 @@ function crearYSeleccionarBanco() {
   toast(`Banco "${nombre}" creado`,'success');
 }
 
+// colMapping: { fecha, concepto, importe, cargo, abono } — set by visual UI
+let colMapping = {};
+let currentBancoId = '';
+
 function buildPreview(filename, bancoId) {
+  currentBancoId = bancoId;
   document.getElementById('previewCard').style.display='block';
   const ext = filename.split('.').pop().toLowerCase();
-  document.getElementById('previewFileName').innerHTML = `${filename} <span class="file-type-badge ${ext}">${ext.toUpperCase()}</span>`;
-  const prev = document.getElementById('previewContent');
-  const rows = parsedRows.slice(0,4);
-  prev.innerHTML = `<p style="font-size:12px;color:var(--text2);margin-bottom:8px">${parsedRows.length} filas detectadas</p>
-    <div style="overflow-x:auto"><table class="preview-table">
-      <tr>${parsedHeaders.map(h=>`<td>${h}</td>`).join('')}</tr>
-      ${rows.map(r=>`<tr>${parsedHeaders.map(h=>`<td>${r[h]||''}</td>`).join('')}</tr>`).join('')}
-    </table></div>`;
+  document.getElementById('previewFileName').innerHTML = filename + ' <span class="file-type-badge ' + ext + '">' + ext.toUpperCase() + '</span>';
 
-  const opts = parsedHeaders.map(h=>`<option value="${h}">${h}</option>`).join('');
-  const optsNone = `<option value="">—</option>`+opts;
-  ['colFecha','colConcepto','colImporte'].forEach(id=>document.getElementById(id).innerHTML=opts);
-  ['colCargo','colAbono'].forEach(id=>document.getElementById(id).innerHTML=optsNone);
-  autoDetect(parsedHeaders);
+  // Auto-detect column roles
+  colMapping = autoDetect(parsedHeaders);
 
-  // Set selected banco
-  document.getElementById('colBanco').innerHTML = state.bancos.map(b=>`<option value="${b.id}"${b.id===bancoId?' selected':''}>${b.nombre}</option>`).join('');
+  renderColMappingUI();
 }
 
 function autoDetect(headers) {
-  const n=h=>h.toLowerCase().replace(/[^a-z]/g,'');
-  const find=(...kws)=>headers.find(h=>kws.some(k=>n(h).includes(k)))||headers[0];
-  document.getElementById('colFecha').value = find('fecha','date','fech','dia');
-  document.getElementById('colConcepto').value = find('descripcion','descripci','concepto','movimiento','detalle');
-  document.getElementById('colImporte').value = find('importe','cantidad','amount','euros');
-  const cargo=headers.find(h=>n(h).includes('cargo')||n(h).includes('debito'));
-  const abono=headers.find(h=>n(h).includes('abono')||n(h).includes('credito'));
-  if(cargo) document.getElementById('colCargo').value=cargo;
-  if(abono) document.getElementById('colAbono').value=abono;
+  const n = h => h.toLowerCase().replace(/[^a-záéíóúñ\s]/gi,'');
+  const find = (...kws) => headers.find(h => kws.some(k => n(h).includes(k))) || null;
+  return {
+    fecha:   find('f. valor','fecha valor','fecha','date','fech','dia') || headers[0],
+    concepto:find('descripci','concepto','movimiento','detalle') || headers[1],
+    importe: find('importe') || find('cantidad','amount','euros') || null,
+    cargo:   find('cargo','debito','cargos') || null,
+    abono:   find('abono','credito','abonos') || null,
+    ignorar: []
+  };
+}
+
+function renderColMappingUI() {
+  const prev = document.getElementById('previewContent');
+
+  // Role options for each column dropdown
+  const roleOpts = [
+    {val:'fecha',    label:'📅 Fecha'},
+    {val:'concepto', label:'📝 Concepto'},
+    {val:'importe',  label:'💶 Importe (con signo)'},
+    {val:'cargo',    label:'➖ Cargo (gasto)'},
+    {val:'abono',    label:'➕ Abono (ingreso)'},
+    {val:'ignorar',  label:'🚫 Ignorar'},
+  ];
+
+  // Build active role map for quick lookup
+  const getRoleOf = col => {
+    if (col === colMapping.fecha) return 'fecha';
+    if (col === colMapping.concepto) return 'concepto';
+    if (col === colMapping.importe) return 'importe';
+    if (col === colMapping.cargo) return 'cargo';
+    if (col === colMapping.abono) return 'abono';
+    return 'ignorar';
+  };
+
+  // Sample rows (up to 5)
+  const sampleRows = parsedRows.slice(0, 5);
+
+  let html = '<p style="font-size:12px;color:var(--text2);margin-bottom:12px">' + parsedRows.length + ' filas detectadas — asigna el rol de cada columna:</p>';
+  html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+
+  // Header row with role selectors
+  html += '<thead><tr>';
+  parsedHeaders.forEach((h, ci) => {
+    const role = getRoleOf(h);
+    const selOpts = roleOpts.map(o => '<option value="' + o.val + '"' + (o.val===role?' selected':'') + '>' + o.label + '</option>').join('');
+    html += '<th style="padding:6px 8px;border:1px solid var(--border);background:var(--surface2);min-width:130px;vertical-align:top">';
+    html += '<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + h + '">' + h + '</div>';
+    html += '<select style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:3px 4px;font-size:11px;font-family:var(--font-body)" onchange="updateColRole(' + ci + ',this.value)">' + selOpts + '</select>';
+    html += '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  // Sample data rows
+  sampleRows.forEach(row => {
+    html += '<tr>';
+    parsedHeaders.forEach(h => {
+      const role = getRoleOf(h);
+      const color = role==='fecha'?'var(--accent3)':role==='concepto'?'var(--text)':role==='importe'||role==='cargo'||role==='abono'?'var(--income)':'var(--text3)';
+      html += '<td style="padding:5px 8px;border:1px solid var(--border);color:' + color + ';white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="' + (row[h]||'') + '">' + (row[h]||'<span style=\'color:var(--text3)\'>—</span>') + '</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  // Decimal selector + banco info
+  html += '<div style="display:flex;gap:12px;margin-top:14px;align-items:center;flex-wrap:wrap">';
+  html += '<div class="field-group" style="flex:0 0 auto"><label class="field-label">Separador decimal</label><select class="field-input" id="colDecimal"><option value="coma">Coma (1.234,56)</option><option value="punto">Punto (1,234.56)</option></select></div>';
+  const bancoActual = state.bancos.find(b=>b.id===currentBancoId);
+  html += '<div style="font-size:12px;color:var(--text2);margin-top:18px">Banco: <strong style="color:var(--accent)">' + (bancoActual?.nombre||currentBancoId) + '</strong> — <a href="#" onclick="cerrarModal(\'modalBanco\');openBancoPicker(pendingFilename);return false" style="color:var(--accent3);font-size:11px">cambiar</a></div>';
+  html += '</div>';
+
+  prev.innerHTML = html;
+}
+
+function updateColRole(colIdx, role) {
+  const col = parsedHeaders[colIdx];
+  // Remove this col from any existing role
+  if (colMapping.fecha === col) colMapping.fecha = null;
+  if (colMapping.concepto === col) colMapping.concepto = null;
+  if (colMapping.importe === col) colMapping.importe = null;
+  if (colMapping.cargo === col) colMapping.cargo = null;
+  if (colMapping.abono === col) colMapping.abono = null;
+  // Assign new role (only one col per role, except ignorar)
+  if (role !== 'ignorar') {
+    // Clear previous assignment of same role
+    if (role === 'fecha') colMapping.fecha = col;
+    else if (role === 'concepto') colMapping.concepto = col;
+    else if (role === 'importe') colMapping.importe = col;
+    else if (role === 'cargo') colMapping.cargo = col;
+    else if (role === 'abono') colMapping.abono = col;
+  }
+  renderColMappingUI();
 }
 
 function importarDatos() {
-  const colF=document.getElementById('colFecha').value;
-  const colC=document.getElementById('colConcepto').value;
-  const colI=document.getElementById('colImporte').value;
-  const colCargo=document.getElementById('colCargo').value;
-  const colAbono=document.getElementById('colAbono').value;
-  const banco=document.getElementById('colBanco').value;
-  const decimal=document.getElementById('colDecimal').value;
-  const bancoObj=state.bancos.find(b=>b.id===banco);
-  const bancoNombre=bancoObj?.nombre||banco;
+  const colF = colMapping.fecha;
+  const colC = colMapping.concepto;
+  const colI = colMapping.importe;
+  const colCargo = colMapping.cargo;
+  const colAbono = colMapping.abono;
+  const banco = currentBancoId;
+  const decimalEl = document.getElementById('colDecimal');
+  const decimal = decimalEl ? decimalEl.value : 'coma';
+  const bancoObj = state.bancos.find(b=>b.id===banco);
+  const bancoNombre = bancoObj?.nombre || banco;
 
-  let nuevos=0,duplicados=0;
-  parsedRows.forEach(row=>{
+  if (!colF) { toast('Asigna la columna de Fecha','error'); return; }
+  if (!colC) { toast('Asigna la columna de Concepto','error'); return; }
+  if (!colI && !colCargo && !colAbono) { toast('Asigna al menos una columna de importe','error'); return; }
+
+  let nuevos=0, duplicados=0;
+  parsedRows.forEach(row => {
     let importe=0;
-    if(colI&&row[colI]){importe=parseImporte(row[colI],decimal);}
-    else if(colCargo||colAbono){
-      const c=colCargo?parseImporte(row[colCargo]||'0',decimal):0;
-      const a=colAbono?parseImporte(row[colAbono]||'0',decimal):0;
-      importe=a-Math.abs(c);
+    if (colI && row[colI]) {
+      importe = parseImporte(row[colI], decimal);
+    } else if (colCargo || colAbono) {
+      const c = colCargo ? parseImporte(row[colCargo]||'0', decimal) : 0;
+      const a = colAbono ? parseImporte(row[colAbono]||'0', decimal) : 0;
+      importe = a - Math.abs(c);
     }
-    const fecha=normFecha(row[colF]||'');
-    const concepto=(row[colC]||'').trim();
-    if(!concepto&&!importe) return;
-    const hash=`${fecha}_${concepto}_${importe}_${banco}`;
-    if(state.movimientos.some(m=>m.hash===hash)){duplicados++;return;}
-    const partida=aplicarReglas(concepto);
+    const fecha = normFecha(row[colF]||'');
+    const concepto = (row[colC]||'').trim();
+    if (!concepto && !importe) return;
+    const hash = fecha+'_'+concepto+'_'+importe+'_'+banco;
+    if (state.movimientos.some(m=>m.hash===hash)) { duplicados++; return; }
+    const partida = aplicarReglas(concepto);
     state.movimientos.push({id:uid(),hash,fecha,concepto,importe,banco,bancoNombre,partida,importadoEn:new Date().toISOString()});
     nuevos++;
   });
 
   state.historial.unshift({fecha:new Date().toISOString().substring(0,10),banco:bancoNombre,tipo:parsedFileType.toUpperCase(),nuevos,duplicados});
-  if(state.historial.length>50) state.historial.pop();
+  if (state.historial.length>50) state.historial.pop();
   cancelarPreview();
   renderAll();
-  toast(`✓ ${nuevos} movimientos importados${duplicados?' ('+duplicados+' dup.)':''}`, 'success');
+  toast('✓ ' + nuevos + ' movimientos importados' + (duplicados?' ('+duplicados+' dup.)':''), 'success');
   syncDrive();
 }
 
